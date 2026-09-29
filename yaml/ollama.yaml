@@ -1,0 +1,154 @@
+Name: Ollama
+Category: InferenceEngine
+Description: |
+  Ollama is an open-source runtime that packages and serves GGUF/safetensors
+  model weights as a local OpenAI-compatible REST API on port 11434. It installs
+  a persistent system service and pulls multi-gigabyte model files from
+  registry.ollama.ai. An adversary or insider can deploy Ollama to run uncensored
+  LLMs entirely air-gapped from corporate DLP controls, exfiltrate data via the
+  local API, or use it as a covert AI-assisted reasoning layer for C2 scripting.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+
+Details:
+  Website: https://ollama.com
+  License: MIT
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - LocalInference
+    - APIServer
+    - ModelDownload
+    - GPUAcceleration
+
+Artifacts:
+
+  Disk:
+    - Path: /usr/local/bin/ollama
+      Description: Main Ollama binary — default install script location
+      OS: Linux
+      Type: Binary
+    - Path: ~/.ollama/bin/ollama
+      Description: User-space Ollama binary for non-root installs
+      OS: Linux
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\Programs\Ollama\ollama.exe
+      Description: Ollama Windows installer binary
+      OS: Windows
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\Programs\Ollama\ollama_llama_server.exe
+      Description: Underlying llama.cpp inference subprocess spawned by Ollama on Windows
+      OS: Windows
+      Type: Binary
+    - Path: ~/.ollama/logs/server.log
+      Description: Server log containing model load events and API request history
+      OS: Linux
+      Type: Log
+    - Path: C:\Users\*\AppData\Local\Ollama\logs\server.log
+      Description: Server log (Windows)
+      OS: Windows
+      Type: Log
+
+  ModelStorage:
+    - Path: ~/.ollama/models/
+      Description: Default model blob store on Linux/macOS — contains multi-GB GGUF blobs
+      OS: Linux
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+    - Path: C:\Users\*\.ollama\models\
+      Description: Default model blob store on Windows
+      OS: Windows
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+
+  Process:
+    - Name: ollama
+      Description: Main server and CLI process
+      CLI:
+        - Pattern: 'ollama\s+serve'
+          Description: Starts the OpenAI-compatible REST API server on :11434
+        - Pattern: 'ollama\s+run\s+\S+'
+          Description: Pulls (if absent) and runs a named model interactively
+        - Pattern: 'ollama\s+pull\s+\S+'
+          Description: Downloads model weights from registry.ollama.ai
+      ParentProcess: systemd
+    - Name: ollama_llama_server
+      Description: llama.cpp inference subprocess — spawned per-session by ollama
+      CLI:
+        - Pattern: 'ollama_llama_server.*--model\s+\S+\.gguf'
+          Description: Inference subprocess loading a specific GGUF model file
+      ParentProcess: ollama
+
+  Network:
+    - Description: Default local OpenAI-compatible REST API
+      Protocol: TCP
+      Ports:
+        - 11434
+      BindAddress: '127.0.0.1'
+      Domains: []
+    - Description: Model registry — Ollama pulls weight blobs from here
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - registry.ollama.ai
+        - ollama.com
+
+  Persistence:
+    - OS: Linux
+      Type: Service
+      Path: /etc/systemd/system/ollama.service
+      Description: systemd unit installed by install.sh; runs as a dedicated 'ollama' system user
+    - OS: macOS
+      Type: LaunchAgent
+      Path: ~/Library/LaunchAgents/com.ollama.ollama.plist
+      Description: per-user LaunchAgent for macOS persistence
+    - OS: Windows
+      Type: Registry
+      Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Ollama
+      Description: Auto-start Run key written by the Windows installer
+
+  EventLog:
+    - EventID: 7045
+      ProviderName: Service Control Manager
+      LogFile: System.evtx
+      Description: New service 'Ollama' registered on first Windows installation
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation event for ollama.exe or ollama_llama_server.exe
+
+  Registry:
+    - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Ollama
+      Description: Auto-start persistence key written by the Ollama Windows installer
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/ollama_network.yml
+      Description: Detects outbound connections to registry.ollama.ai indicating model pull activity
+    - Path: detections/sigma/ollama_service_install.yml
+      Description: Detects Ollama service registration via Windows Event ID 7045
+    - Path: detections/sigma/llama_server_spawn.yml
+      Description: Detects ollama_llama_server child process creation
+  YARA:
+    - Path: detections/yara/gguf_magic_bytes.yar
+      Description: Matches GGUF magic bytes — flags model weight files at rest or in transit
+
+References:
+  - https://ollama.com/download
+  - https://github.com/ollama/ollama
+  - https://github.com/ollama/ollama/blob/main/docs/api.md
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

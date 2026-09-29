@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kwouffe/lolllm/raw/branch/main/schema/lolllm.schema.json",
+  "title": "lolllm Entry",
+  "description": "Schema for a Living Off The Land: Large Language Models tool entry",
+  "type": "object",
+  "required": ["Name", "Category", "Description", "Author", "Created", "LastModified", "Details", "Artifacts", "Detections"],
+  "additionalProperties": false,
+  "properties": {
+    "Name": { "type": "string", "minLength": 1 },
+    "Category": {
+      "type": "string",
+      "enum": ["InferenceEngine", "CloudAPIClient", "FineTuningTool", "EmbeddingEngine"]
+    },
+    "Description": { "type": "string", "minLength": 10 },
+    "Author": { "type": "string" },
+    "Created": { "type": "string", "format": "date" },
+    "LastModified": { "type": "string", "format": "date" },
+    "Details": {
+      "type": "object",
+      "required": ["Website", "License", "Privileges", "Free", "SupportedOS", "Capabilities"],
+      "additionalProperties": false,
+      "properties": {
+        "Website": { "type": "string" },
+        "License": { "type": "string" },
+        "Privileges": { "type": "string", "enum": ["user", "admin", "SYSTEM", "root"] },
+        "Free": { "type": "boolean" },
+        "SupportedOS": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["Windows", "Linux", "macOS"] },
+          "minItems": 1
+        },
+        "Capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["LocalInference", "APIServer", "ModelDownload", "GPUAcceleration", "RemoteAPIProxy"]
+          }
+        }
+      }
+    },
+    "Artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Disk": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["Path", "Description", "OS", "Type"],
+            "additionalProperties": false,
+            "properties": {
+              "Path": { "type": "string" },
+              "Description": { "type": "string" },
+              "OS": { "type": "string", "enum": ["Windows", "Linux", "macOS", "Any"] },
+              "Type": { "type": "string", "enum": ["Binary", "Config", "Log", "Cache"] }
+            }
+          }
+        },
+        "ModelStorage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["Path", "Description", "OS"],
+            "additionalProperties": false,
+            "properties": {
+              "Path": { "type": "string" },
+              "Description": { "type": "string" },
+              "OS": { "type": "string", "enum": ["Windows", "Linux", "macOS", "Any"] },
+              "MagicBytes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["Format", "Hex", "Offset"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "Format": { "type": "string" },
+                    "Hex": { "type": "string", "pattern": "^([0-9A-Fa-f]{2} ?)+$" },
+                    "Offset": { "type": "integer", "minimum": 0 }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Process": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["Name", "Description"],
+            "additionalProperties": false,
+            "properties": {
+              "Name": { "type": "string" },
+              "Description": { "type": "string" },
+              "CLI": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["Pattern", "Description"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "Pattern": { "type": "string" },
+                    "Description": { "type": "string" }
+                  }
+                }
+              },
+              "ParentProcess": { "type": "string" }
+            }
+          }
+        },
+        "Network": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["Description", "Protocol"],
+            "additionalProperties": false,
+            "properties": {
+              "Description": { "type": "string" },
+              "Protocol": { "type": "string", "enum": ["TCP", "UDP"] },
+              "Ports": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 65535 } },
+              "BindAddress": { "type": "string" },
+              "Domains": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "Persistence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["OS", "Type", "Path", "Description"],
+            "additionalProperties": false,
+            "properties": {
+              "OS": { "type": "string", "enum": ["Windows", "Linux", "macOS"] },
+              "Type": { "type": "string", "enum": ["Service", "Registry", "Cron", "LaunchAgent", "LaunchDaemon"] },
+              "Path": { "type": "string" },
+              "Description": { "type": "string" }
+            }
+          }
+        },
+        "EventLog": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["EventID", "ProviderName", "LogFile", "Description"],
+            "additionalProperties": false,
+            "properties": {
+              "EventID": { "type": "integer" },
+              "ProviderName": { "type": "string" },
+              "LogFile": { "type": "string" },
+              "Description": { "type": "string" }
+            }
+          }
+        },
+        "Registry": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["Path", "Description"],
+            "additionalProperties": false,
+            "properties": {
+              "Path": { "type": "string" },
+              "Description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "Detections": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Sigma": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["Path", "Description"],
+            "additionalProperties": false,
+            "properties": {
+              "Path": { "type": "string", "pattern": "^detections/sigma/.*\\.yml$" },
+              "Description": { "type": "string" }
+            }
+          }
+        },
+        "YARA": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["Path", "Description"],
+            "additionalProperties": false,
+            "properties": {
+              "Path": { "type": "string", "pattern": "^detections/yara/.*\\.yar$" },
+              "Description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "References": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "Acknowledgements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["Person"],
+        "additionalProperties": false,
+        "properties": {
+          "Person": { "type": "string" },
+          "Handle": { "type": "string" }
+        }
+      }
+    }
+  }
+}

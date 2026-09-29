@@ -1,0 +1,55 @@
+site_name: lolllm
+site_description: "Living Off The Land: Large Language Models — community-driven detection repository"
+repo_url: https://github.com/kwouffe/lolllm
+repo_name: emilien/lolllm
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - attr_list
+  - md_in_html
+
+extra:
+  social:
+    - icon: fontawesome/brands/git-alt
+      link: https://github.com/kwouffe/lolllm
+
+nav:
+  - Home: index.md
+  - Tools: tools/
+  - Schema Reference: schema.md
+  - Contribute: contribute.md

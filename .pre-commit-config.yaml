@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [--config-file, .yamllint]
+        files: ^yaml/.*\.yaml$
+
+  - repo: local
+    hooks:
+      - id: lolllm-validate
+        name: Validate lolllm YAML schema
+        entry: python scripts/validate.py
+        language: python
+        files: ^yaml/.*\.yaml$
+        pass_filenames: false
+        additional_dependencies: ["pydantic>=2.7", "pyyaml>=6.0"]

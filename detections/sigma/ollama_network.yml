@@ -1,0 +1,28 @@
+title: Ollama Model Registry Connection
+id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+status: experimental
+description: Detects outbound connections to registry.ollama.ai or ollama.com, indicating
+  model pull or update activity by the Ollama inference engine.
+author: lolllm-project
+date: 2025/01/01
+modified: 2025/01/01
+tags:
+  - attack.execution
+  - attack.t1059
+  - attack.exfiltration
+  - attack.t1048
+references:
+  - https://github.com/emilien/lolllm
+  - https://ollama.com
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    DestinationHostname|contains:
+      - 'registry.ollama.ai'
+      - 'ollama.com'
+  condition: selection
+falsepositives:
+  - Authorized use of Ollama by ML/research teams
+level: medium
