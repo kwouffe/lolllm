@@ -126,13 +126,13 @@ TEMPLATE = """\
 {% if tool.Detections.Sigma %}
 ### Sigma
 {% for s in tool.Detections.Sigma %}
-- [`{{ s.Path | basename }}`](../../{{ s.Path }}) — {{ s.Description }}
+- `{{ s.Path }}` — {{ s.Description }}
 {% endfor %}
 {% endif %}
 {% if tool.Detections.YARA %}
 ### YARA
 {% for y in tool.Detections.YARA %}
-- [`{{ y.Path | basename }}`](../../{{ y.Path }}) — {{ y.Description }}
+- `{{ y.Path }}` — {{ y.Description }}
 {% endfor %}
 {% endif %}
 {% endif %}

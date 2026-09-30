@@ -50,6 +50,6 @@ extra:
 
 nav:
   - Home: index.md
-  - Tools: tools/
+  - Tools: tools/index.md
   - Schema Reference: schema.md
   - Contribute: contribute.md
