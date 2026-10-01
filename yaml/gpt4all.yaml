@@ -1,0 +1,124 @@
+Name: GPT4All
+Category: InferenceEngine
+Description: |
+  GPT4All is a cross-platform Electron desktop application by Nomic AI that
+  provides a user-friendly interface for running local LLMs. It features a
+  one-click installer, automatic model downloads, and operates entirely offline
+  after model acquisition. GPT4All does not expose a network API by default,
+  making network-based detection less reliable. Primary forensic indicators are
+  the application binary, model files in the Nomic AI data directory, and the
+  model download traffic to gpt4all.io during initial setup.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://gpt4all.io
+  License: MIT
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - LocalInference
+    - ModelDownload
+    - GPUAcceleration
+
+Artifacts:
+
+  Disk:
+    - Path: /Applications/GPT4All.app/Contents/MacOS/GPT4All
+      Description: GPT4All Electron binary (macOS)
+      OS: macOS
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\Programs\GPT4All\GPT4All.exe
+      Description: GPT4All installer binary (Windows)
+      OS: Windows
+      Type: Binary
+    - Path: ~/Applications/GPT4All-*.AppImage
+      Description: GPT4All portable AppImage (Linux)
+      OS: Linux
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\nomic.ai\GPT4All\
+      Description: Model storage and application data (Windows)
+      OS: Windows
+      Type: Cache
+    - Path: ~/.local/share/nomic.ai/GPT4All/
+      Description: Model storage and application data (Linux)
+      OS: Linux
+      Type: Cache
+    - Path: ~/Library/Application Support/nomic.ai/GPT4All/
+      Description: Model storage and application data (macOS)
+      OS: macOS
+      Type: Cache
+
+  ModelStorage:
+    - Path: C:\Users\*\AppData\Local\nomic.ai\GPT4All\*.gguf
+      Description: Downloaded GGUF model files (Windows)
+      OS: Windows
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+    - Path: ~/.local/share/nomic.ai/GPT4All/*.gguf
+      Description: Downloaded GGUF model files (Linux)
+      OS: Linux
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+
+  Process:
+    - Name: GPT4All
+      Description: Main Electron application process
+      CLI:
+        - Pattern: 'GPT4All'
+          Description: Main application process
+      ParentProcess: explorer.exe
+
+  Network:
+    - Description: Model download from Nomic AI CDN
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - gpt4all.io
+        - huggingface.co
+
+  Persistence:
+    - OS: Windows
+      Type: Registry
+      Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\GPT4All
+      Description: Auto-start registry key (if enabled by user)
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for GPT4All.exe
+
+  Registry:
+    - Path: HKCU\Software\nomic.ai\GPT4All
+      Description: GPT4All application settings and configuration
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/gpt4all_model_download.yml
+      Description: Detects connections to gpt4all.io for model downloads
+    - Path: detections/sigma/gpt4all_process.yml
+      Description: Detects GPT4All process creation
+  YARA:
+    - Path: detections/yara/gguf_magic_bytes.yar
+      Description: Matches GGUF model files in the Nomic AI data directory
+
+References:
+  - https://gpt4all.io
+  - https://github.com/nomic-ai/gpt4all
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

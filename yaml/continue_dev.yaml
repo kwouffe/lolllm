@@ -1,0 +1,112 @@
+Name: Continue.dev
+Category: CloudAPIClient
+Description: |
+  Continue.dev is an open-source VS Code and JetBrains extension that provides
+  AI code completion and chat using configurable LLM backends (local Ollama,
+  cloud OpenAI, Anthropic, and others). Unlike GitHub Copilot, Continue.dev is
+  model-agnostic — the user configures which provider receives their code.
+  Configuration including API keys is stored in ~/.continue/config.json.
+  When configured with a cloud provider, it behaves identically to Copilot
+  from a data exfiltration perspective. When configured with Ollama, all data
+  stays local. The configuration file is the forensic key artifact.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://continue.dev
+  License: Apache-2.0
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: ~/.vscode/extensions/continue.continue-*/
+      Description: Continue.dev VS Code extension directory (Linux/macOS)
+      OS: Linux
+      Type: Cache
+    - Path: C:\Users\*\.vscode\extensions\continue.continue-*\
+      Description: Continue.dev VS Code extension directory (Windows)
+      OS: Windows
+      Type: Cache
+    - Path: ~/.continue/config.json
+      Description: >
+        Continue.dev configuration file — contains model selection, API keys,
+        and provider configuration. HIGH VALUE: reveals which LLM providers
+        are configured and may contain plaintext API keys.
+      OS: Any
+      Type: Config
+    - Path: ~/.continue/config.ts
+      Description: Continue.dev TypeScript configuration (alternative to JSON)
+      OS: Any
+      Type: Config
+    - Path: ~/.continue/logs/
+      Description: Continue.dev session logs — may contain code snippets sent to LLM
+      OS: Any
+      Type: Log
+
+  ModelStorage: []
+
+  Process:
+    - Name: code
+      Description: VS Code extension host — Continue.dev runs within the VS Code extension host
+      CLI:
+        - Pattern: 'code\s+--type=extensionHost'
+          Description: VS Code extension host where Continue.dev runs
+      ParentProcess: code
+
+  Network:
+    - Description: OpenAI API (if configured as provider)
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.openai.com
+    - Description: Anthropic API (if configured as provider)
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.anthropic.com
+    - Description: Continue.dev hub and telemetry
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - continue.dev
+
+  Persistence: []
+
+  EventLog:
+    - EventID: 5156
+      ProviderName: Microsoft-Windows-Security-Auditing
+      LogFile: Security.evtx
+      Description: Network connection from Code.exe to configured LLM provider endpoint
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/continue_dev_extension.yml
+      Description: Detects creation of continue.continue extension directory in VS Code
+    - Path: detections/sigma/continue_dev_config.yml
+      Description: Detects access to ~/.continue/config.json which may contain API keys
+
+References:
+  - https://continue.dev
+  - https://github.com/continuedev/continue
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

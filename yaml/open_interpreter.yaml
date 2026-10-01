@@ -1,0 +1,112 @@
+Name: Open Interpreter
+Category: CloudAPIClient
+Description: |
+  Open Interpreter is an open-source agentic tool that gives LLMs unrestricted
+  access to execute Python, JavaScript, and shell code on the local machine.
+  It operates as a local Code Interpreter with no sandboxing — the model can
+  read any file, make network connections, install packages, and exfiltrate data.
+  It explicitly advertises a "no guardrails" mode. The combination of cloud LLM
+  reasoning (OpenAI, Anthropic) and local unrestricted code execution makes it
+  the highest-risk tool in the lolllm catalogue. API keys are stored in
+  environment variables or ~/.openinterpreter.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://openinterpreter.com
+  License: AGPL-3.0
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: ~/.local/bin/interpreter
+      Description: Open Interpreter CLI binary (Linux/macOS pip install)
+      OS: Linux
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\Programs\Python\*\Scripts\interpreter.exe
+      Description: Open Interpreter CLI binary (Windows)
+      OS: Windows
+      Type: Binary
+    - Path: ~/.openinterpreter
+      Description: Configuration and session state directory
+      OS: Any
+      Type: Config
+
+  ModelStorage: []
+
+  Process:
+    - Name: interpreter
+      Description: Open Interpreter main process
+      CLI:
+        - Pattern: '^interpreter\s*$'
+          Description: Interactive session
+        - Pattern: 'interpreter.*--os'
+          Description: OS mode — gives the LLM control over the entire OS (mouse, keyboard, screen)
+        - Pattern: 'interpreter.*--force-task-completion'
+          Description: Forces the LLM to complete tasks without user confirmation
+        - Pattern: 'interpreter.*-y'
+          Description: Auto-confirms all code execution without prompting
+      ParentProcess: bash
+    - Name: python
+      Description: Open Interpreter running as Python module
+      CLI:
+        - Pattern: 'python.*-m\s+interpreter'
+          Description: Open Interpreter as Python module
+      ParentProcess: bash
+
+  Network:
+    - Description: OpenAI API (default provider)
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.openai.com
+    - Description: Anthropic API (Claude models)
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.anthropic.com
+
+  Persistence:
+    - OS: Linux
+      Type: Cron
+      Path: ~/.bashrc
+      Description: API key environment variables in shell rc files
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for interpreter.exe — followed by arbitrary child process spawning
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/open_interpreter_process.yml
+      Description: Detects interpreter process creation
+    - Path: detections/sigma/open_interpreter_os_mode.yml
+      Description: Detects Open Interpreter --os flag granting LLM full OS control
+    - Path: detections/sigma/open_interpreter_autoconfirm.yml
+      Description: Detects -y or --force-task-completion flags enabling unattended code execution
+
+References:
+  - https://openinterpreter.com
+  - https://github.com/OpenInterpreter/open-interpreter
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

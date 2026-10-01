@@ -1,0 +1,110 @@
+Name: Amazon Q Developer
+Category: CloudAPIClient
+Description: |
+  Amazon Q Developer (formerly Amazon CodeWhisperer) is AWS's AI coding assistant,
+  available as a VS Code extension, JetBrains plugin, and integrated into the
+  AWS CLI and AWS Console. It sends code context to AWS backend services.
+  In enterprise "Professional Tier", it can connect to internal knowledge bases
+  and codebases stored in Amazon Q Business. All traffic routes through
+  amazonaws.com endpoints and uses AWS SigV4 authentication. Authentication
+  tokens are stored in the AWS credentials chain (~/.aws/credentials or
+  ~/.aws/sso/cache/). Q Developer's integration with the AWS CLI makes it
+  a vector for cloud infrastructure reconnaissance and manipulation.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://aws.amazon.com/q/developer/
+  License: Proprietary
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: ~/.vscode/extensions/amazonwebservices.amazon-q-vscode-*/
+      Description: Amazon Q VS Code extension directory (Linux/macOS)
+      OS: Linux
+      Type: Cache
+    - Path: C:\Users\*\.vscode\extensions\amazonwebservices.amazon-q-vscode-*\
+      Description: Amazon Q VS Code extension directory (Windows)
+      OS: Windows
+      Type: Cache
+    - Path: ~/.aws/sso/cache/
+      Description: AWS SSO authentication cache — contains short-lived tokens used by Q Developer
+      OS: Any
+      Type: Config
+    - Path: ~/.aws/credentials
+      Description: AWS credentials file — may contain IAM user credentials used by Q Developer
+      OS: Any
+      Type: Config
+
+  ModelStorage: []
+
+  Process:
+    - Name: code
+      Description: VS Code extension host running Amazon Q Developer extension
+      CLI:
+        - Pattern: 'code\s+--type=extensionHost'
+          Description: VS Code extension host where Q Developer runs
+      ParentProcess: code
+    - Name: aws
+      Description: AWS CLI with Q Developer integration
+      CLI:
+        - Pattern: 'aws\s+q\s+'
+          Description: AWS CLI invoking Q Developer subcommand
+        - Pattern: 'aws\s+codewhisperer\s+'
+          Description: Legacy CodeWhisperer CLI commands
+      ParentProcess: bash
+
+  Network:
+    - Description: Amazon Q Developer backend API
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - codewhisperer.us-east-1.amazonaws.com
+        - q.us-east-1.amazonaws.com
+        - '*.q.amazonaws.com'
+    - Description: AWS IAM Identity Center (SSO authentication)
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - '*.awsapps.com'
+        - sso.amazonaws.com
+
+  Persistence: []
+
+  EventLog:
+    - EventID: 5156
+      ProviderName: Microsoft-Windows-Security-Auditing
+      LogFile: Security.evtx
+      Description: Network connection from Code.exe to amazonaws.com endpoints on port 443
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/amazon_q_developer_network.yml
+      Description: Detects connections to Q Developer and CodeWhisperer AWS endpoints
+    - Path: detections/sigma/amazon_q_developer_extension.yml
+      Description: Detects installation of Amazon Q Developer VS Code extension
+
+References:
+  - https://aws.amazon.com/q/developer/
+  - https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

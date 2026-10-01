@@ -1,0 +1,124 @@
+Name: text-generation-webui
+Category: InferenceEngine
+Description: |
+  text-generation-webui (also known as oobabooga) is a Python-based web interface
+  and API server for running local LLMs. It supports multiple model formats (GGUF,
+  GPTQ, AWQ, ExLlamaV2) and backends (llama.cpp, transformers, ExLlama). It
+  exposes a Gradio web UI on port 7860 and an OpenAI-compatible API on port 5000.
+  The application is commonly installed via a one-click installer script that
+  bundles Conda/Python. Its wide format support and API compatibility make it
+  a common choice for automated and scripted LLM abuse.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://github.com/oobabooga/text-generation-webui
+  License: Apache-2.0
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - LocalInference
+    - APIServer
+    - ModelDownload
+    - GPUAcceleration
+
+Artifacts:
+
+  Disk:
+    - Path: '*/text-generation-webui/start_linux.sh'
+      Description: Linux one-click start script bundled with the installer
+      OS: Linux
+      Type: Binary
+    - Path: '*/text-generation-webui/start_windows.bat'
+      Description: Windows one-click start batch script
+      OS: Windows
+      Type: Binary
+    - Path: '*/text-generation-webui/server.py'
+      Description: Main Python application entry point
+      OS: Any
+      Type: Binary
+    - Path: '*/text-generation-webui/models/'
+      Description: Default model storage directory (relative to install path)
+      OS: Any
+      Type: Cache
+    - Path: '*/text-generation-webui/characters/'
+      Description: Character/persona definition files — may reveal intended use
+      OS: Any
+      Type: Config
+    - Path: '*/text-generation-webui/logs/'
+      Description: Chat and API request logs
+      OS: Any
+      Type: Log
+
+  ModelStorage:
+    - Path: '*/text-generation-webui/models/**/*.gguf'
+      Description: GGUF models loaded via llama.cpp backend
+      OS: Any
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+
+  Process:
+    - Name: python
+      Description: Python process running server.py — the main web UI and API server
+      CLI:
+        - Pattern: 'python.*server\.py'
+          Description: Main server process
+        - Pattern: 'python.*server\.py.*--api'
+          Description: Server started with API mode enabled
+        - Pattern: 'python.*server\.py.*--listen'
+          Description: Server exposed beyond localhost (--listen flag)
+      ParentProcess: bash
+
+  Network:
+    - Description: Gradio web UI interface
+      Protocol: TCP
+      Ports:
+        - 7860
+      BindAddress: '127.0.0.1'
+      Domains: []
+    - Description: OpenAI-compatible REST API (enabled with --api flag)
+      Protocol: TCP
+      Ports:
+        - 5000
+      BindAddress: '127.0.0.1'
+      Domains: []
+
+  Persistence:
+    - OS: Linux
+      Type: Service
+      Path: /etc/systemd/system/text-generation-webui.service
+      Description: User-created systemd unit for persistent background operation
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for python.exe running server.py
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/tgwebui_process.yml
+      Description: Detects Python process running text-generation-webui server.py
+    - Path: detections/sigma/tgwebui_listen_flag.yml
+      Description: Detects --listen flag exposing the web UI beyond localhost
+  YARA:
+    - Path: detections/yara/gguf_magic_bytes.yar
+      Description: Matches GGUF models in the models/ directory
+
+References:
+  - https://github.com/oobabooga/text-generation-webui
+  - https://github.com/oobabooga/text-generation-webui/wiki/12-%E2%80%90-OpenAI-API
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

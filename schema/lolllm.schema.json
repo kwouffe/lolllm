@@ -4,7 +4,7 @@
   "title": "lolllm Entry",
   "description": "Schema for a Living Off The Land: Large Language Models tool entry",
   "type": "object",
-  "required": ["Name", "Category", "Description", "Author", "Created", "LastModified", "Details", "Artifacts", "Detections"],
+  "required": ["Name", "Category", "Description", "Author", "Created", "LastModified", "ReviewStatus", "Details", "Artifacts", "Detections"],
   "additionalProperties": false,
   "properties": {
     "Name": { "type": "string", "minLength": 1 },
@@ -13,6 +13,11 @@
       "enum": ["InferenceEngine", "CloudAPIClient", "FineTuningTool", "EmbeddingEngine"]
     },
     "Description": { "type": "string", "minLength": 10 },
+    "ReviewStatus": {
+      "type": "string",
+      "enum": ["unreviewed", "in-review", "reviewed"],
+      "description": "Manual review status. Set to 'reviewed' only after a human has verified all artifacts."
+    },
     "Author": { "type": "string" },
     "Created": { "type": "string", "format": "date" },
     "LastModified": { "type": "string", "format": "date" },

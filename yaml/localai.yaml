@@ -1,0 +1,102 @@
+Name: LocalAI
+Category: InferenceEngine
+Description: |
+  LocalAI is a free, open-source, self-hosted alternative to OpenAI's API. It
+  provides a drop-in compatible REST API for text generation, image generation,
+  speech-to-text, and embeddings, running models locally. It ships as a single
+  binary or Docker image, supports GGUF and other formats, and is designed to
+  be a covert OpenAI replacement — any tool or script pointing at
+  api.openai.com can be redirected to LocalAI without code changes. This makes
+  it particularly attractive for bypassing corporate LLM usage controls that
+  monitor OpenAI API calls.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://localai.io
+  License: MIT
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - LocalInference
+    - APIServer
+    - ModelDownload
+    - GPUAcceleration
+
+Artifacts:
+
+  Disk:
+    - Path: /usr/local/bin/local-ai
+      Description: LocalAI single binary (Linux)
+      OS: Linux
+      Type: Binary
+    - Path: '*/localai/models/'
+      Description: Model configuration and GGUF weight files (relative to config directory)
+      OS: Any
+      Type: Cache
+    - Path: '*/localai/*.yaml'
+      Description: Model configuration YAML files specifying model parameters and backends
+      OS: Any
+      Type: Config
+
+  ModelStorage:
+    - Path: '*/localai/models/*.gguf'
+      Description: GGUF model weight files
+      OS: Any
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+
+  Process:
+    - Name: local-ai
+      Description: LocalAI server binary
+      CLI:
+        - Pattern: 'local-ai\s+run'
+          Description: Starting LocalAI server
+        - Pattern: 'local-ai.*--address\s+0\.0\.0\.0'
+          Description: LocalAI exposed on all interfaces
+      ParentProcess: bash
+
+  Network:
+    - Description: OpenAI-compatible REST API (drop-in replacement)
+      Protocol: TCP
+      Ports:
+        - 8080
+      BindAddress: '0.0.0.0'
+      Domains: []
+
+  Persistence:
+    - OS: Linux
+      Type: Service
+      Path: /etc/systemd/system/localai.service
+      Description: Systemd unit for persistent LocalAI deployment
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for local-ai binary
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/localai_process.yml
+      Description: Detects local-ai process creation
+    - Path: detections/sigma/localai_openai_intercept.yml
+      Description: Detects local-ai listening on port 8080 as an OpenAI API replacement
+
+References:
+  - https://localai.io
+  - https://github.com/mudler/LocalAI
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

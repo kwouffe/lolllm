@@ -122,6 +122,7 @@ class LolLLMEntry(BaseModel):
     Author: str
     Created: date
     LastModified: date
+    ReviewStatus: Literal["unreviewed", "in-review", "reviewed"]
     Details: Details
     Artifacts: Artifacts
     Detections: Detections

@@ -1,0 +1,131 @@
+Name: GitHub Copilot
+Category: CloudAPIClient
+Description: |
+  GitHub Copilot is Microsoft/GitHub's AI code completion and chat assistant,
+  delivered as a VS Code extension (and JetBrains/Vim plugins). It is the most
+  widely deployed AI coding tool in enterprise environments. All code context
+  sent to Copilot is transmitted to GitHub's backend (copilot-proxy.githubusercontent.com),
+  representing a significant data exfiltration risk for proprietary codebases.
+  The extension runs in VS Code's extension host — no standalone process is
+  created. Detection pivots on the extension directory, network connections
+  from Code.exe to GitHub Copilot endpoints, and VS Code settings containing
+  Copilot configuration.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://github.com/features/copilot
+  License: Proprietary
+  Privileges: user
+  Free: false
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: ~/.vscode/extensions/github.copilot-*/
+      Description: GitHub Copilot extension directory (Linux/macOS)
+      OS: Linux
+      Type: Cache
+    - Path: ~/.vscode/extensions/github.copilot-chat-*/
+      Description: GitHub Copilot Chat extension directory (Linux/macOS)
+      OS: Linux
+      Type: Cache
+    - Path: C:\Users\*\.vscode\extensions\github.copilot-*\
+      Description: GitHub Copilot extension directory (Windows)
+      OS: Windows
+      Type: Cache
+    - Path: C:\Users\*\.vscode\extensions\github.copilot-chat-*\
+      Description: GitHub Copilot Chat extension directory (Windows)
+      OS: Windows
+      Type: Cache
+    - Path: ~/.config/Code/User/globalStorage/github.copilot/
+      Description: Copilot global storage including cached OAuth tokens (Linux)
+      OS: Linux
+      Type: Config
+    - Path: ~/Library/Application Support/Code/User/globalStorage/github.copilot/
+      Description: Copilot global storage (macOS)
+      OS: macOS
+      Type: Config
+    - Path: C:\Users\*\AppData\Roaming\Code\User\globalStorage\github.copilot\
+      Description: Copilot global storage including cached OAuth tokens (Windows)
+      OS: Windows
+      Type: Config
+
+  ModelStorage: []
+
+  Process:
+    - Name: code
+      Description: VS Code extension host process — Copilot runs entirely within Code.exe/code
+      CLI:
+        - Pattern: 'code\s+--type=extensionHost'
+          Description: VS Code extension host where Copilot runs
+      ParentProcess: code
+    - Name: node
+      Description: Some Copilot language server components may spawn a Node.js subprocess
+      CLI:
+        - Pattern: 'node.*copilot'
+          Description: Copilot language server subprocess
+      ParentProcess: code
+
+  Network:
+    - Description: GitHub Copilot inference proxy — receives code context
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - copilot-proxy.githubusercontent.com
+        - copilot.github.com
+        - api.githubcopilot.com
+    - Description: GitHub OAuth and telemetry
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - github.com
+        - vscode.dev
+        - dc.services.visualstudio.com
+
+  Persistence:
+    - OS: Windows
+      Type: Registry
+      Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Code
+      Description: VS Code auto-start — Copilot active whenever VS Code launches
+    - OS: macOS
+      Type: LaunchAgent
+      Path: ~/Library/LaunchAgents/com.microsoft.VSCode.plist
+      Description: VS Code LaunchAgent — Copilot loaded at every VS Code startup
+
+  EventLog:
+    - EventID: 5156
+      ProviderName: Microsoft-Windows-Security-Auditing
+      LogFile: Security.evtx
+      Description: Network connection from Code.exe to copilot-proxy.githubusercontent.com:443
+
+  Registry:
+    - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\GitHub Copilot
+      Description: Copilot extension registration in Windows registry (if applicable)
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/github_copilot_network.yml
+      Description: Detects VS Code connecting to copilot-proxy.githubusercontent.com
+    - Path: detections/sigma/github_copilot_extension_install.yml
+      Description: Detects creation of github.copilot extension directory
+
+References:
+  - https://github.com/features/copilot
+  - https://docs.github.com/en/copilot
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

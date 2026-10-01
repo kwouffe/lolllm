@@ -1,0 +1,121 @@
+Name: llama.cpp
+Category: InferenceEngine
+Description: |
+  llama.cpp is the foundational open-source C/C++ inference engine for GGUF-format
+  LLM models. It compiles to a small set of standalone binaries (llama-cli,
+  llama-server, llama-quantize) with no runtime dependencies. llama-server exposes
+  an OpenAI-compatible REST API on port 8080. Because it is a compiled binary with
+  no installer or package manager, it has a minimal footprint and can be dropped in
+  any writable directory. Most other local inference engines (Ollama, koboldcpp,
+  LM Studio) embed or wrap llama.cpp internally.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://github.com/ggerganov/llama.cpp
+  License: MIT
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - LocalInference
+    - APIServer
+    - GPUAcceleration
+
+Artifacts:
+
+  Disk:
+    - Path: llama-cli
+      Description: Interactive CLI for single-turn and chat inference (no standard install path — runs from any directory)
+      OS: Linux
+      Type: Binary
+    - Path: llama-server
+      Description: OpenAI-compatible HTTP inference server binary
+      OS: Linux
+      Type: Binary
+    - Path: llama-cli.exe
+      Description: Interactive CLI binary (Windows)
+      OS: Windows
+      Type: Binary
+    - Path: llama-server.exe
+      Description: OpenAI-compatible HTTP server binary (Windows)
+      OS: Windows
+      Type: Binary
+    - Path: llama-quantize
+      Description: Model quantization utility — converts models to GGUF format
+      OS: Linux
+      Type: Binary
+
+  ModelStorage:
+    - Path: '*.gguf'
+      Description: GGUF model files loaded at runtime via --model flag (no fixed path — user-specified)
+      OS: Any
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+
+  Process:
+    - Name: llama-server
+      Description: HTTP inference server process — spawned to serve the OpenAI-compatible API
+      CLI:
+        - Pattern: 'llama-server.*--model\s+\S+\.gguf'
+          Description: Server loading a GGUF model file
+        - Pattern: 'llama-server.*--port\s+\d+'
+          Description: Server bound to a non-default port (default 8080)
+        - Pattern: 'llama-server.*--host\s+0\.0\.0\.0'
+          Description: Server exposed on all interfaces — lateral movement risk
+      ParentProcess: bash
+    - Name: llama-cli
+      Description: Interactive or scripted inference CLI
+      CLI:
+        - Pattern: 'llama-cli.*--model\s+\S+\.gguf'
+          Description: CLI loading a GGUF model
+        - Pattern: 'llama-cli.*-p\s+'
+          Description: Single-prompt non-interactive execution (scripting/automation)
+      ParentProcess: bash
+
+  Network:
+    - Description: llama-server OpenAI-compatible REST API (default port)
+      Protocol: TCP
+      Ports:
+        - 8080
+      BindAddress: '127.0.0.1'
+      Domains: []
+
+  Persistence:
+    - OS: Linux
+      Type: Service
+      Path: /etc/systemd/system/llama-server.service
+      Description: User-created systemd unit to persist llama-server as a background service
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for llama-server.exe or llama-cli.exe
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/llama_cpp_server_expose.yml
+      Description: Detects llama-server bound to 0.0.0.0 (exposed beyond localhost)
+    - Path: detections/sigma/llama_cpp_process.yml
+      Description: Detects llama-cli or llama-server process creation
+  YARA:
+    - Path: detections/yara/gguf_magic_bytes.yar
+      Description: Matches GGUF model files loaded by llama.cpp
+
+References:
+  - https://github.com/ggerganov/llama.cpp
+  - https://github.com/ggerganov/ggml/blob/master/docs/gguf.md
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

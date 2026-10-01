@@ -1,0 +1,124 @@
+Name: AnythingLLM
+Category: InferenceEngine
+Description: |
+  AnythingLLM is an open-source all-in-one AI application that combines a
+  document chat interface (RAG) with support for both local inference engines
+  (Ollama, LM Studio, llama.cpp) and cloud LLM APIs (OpenAI, Anthropic).
+  It stores all documents, embeddings, and conversation history in a local
+  SQLite database (anythingllm.db). Sensitive documents uploaded for RAG are
+  chunked, embedded, and stored persistently — a forensically important artifact.
+  AnythingLLM can run as a Desktop application (Electron) or as a self-hosted
+  Docker container on port 3001. API keys for cloud providers are stored in
+  the application's .env or database.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://anythingllm.com
+  License: MIT
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - LocalInference
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: /Applications/AnythingLLM.app/
+      Description: AnythingLLM Electron desktop application (macOS)
+      OS: macOS
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\Programs\anythingllm\AnythingLLM.exe
+      Description: AnythingLLM Electron desktop application (Windows)
+      OS: Windows
+      Type: Binary
+    - Path: ~/anythingllm/
+      Description: AnythingLLM data directory — contains configuration, .env with API keys, and database
+      OS: Linux
+      Type: Config
+    - Path: ~/anythingllm/storage/anythingllm.db
+      Description: >
+        SQLite database containing all conversation history, document chunks, vector
+        embeddings, and API key configuration. HIGH VALUE forensic artifact.
+      OS: Any
+      Type: Log
+    - Path: ~/anythingllm/.env
+      Description: AnythingLLM environment configuration — may contain plaintext API keys
+      OS: Any
+      Type: Config
+    - Path: ~/anythingllm/storage/documents/
+      Description: Uploaded documents staged for RAG processing — may contain sensitive files
+      OS: Any
+      Type: Log
+
+  ModelStorage:
+    - Path: ~/anythingllm/storage/models/
+      Description: Locally downloaded model files if using built-in model management
+      OS: Any
+      Format: GGUF
+
+  Process:
+    - Name: AnythingLLM
+      Description: AnythingLLM Electron desktop application
+      CLI:
+        - Pattern: 'AnythingLLM\s+'
+          Description: Desktop application process
+      ParentProcess: launchd
+    - Name: node
+      Description: AnythingLLM server component (Node.js Express backend)
+      CLI:
+        - Pattern: 'node.*anythingllm'
+          Description: AnythingLLM backend server
+      ParentProcess: AnythingLLM
+
+  Network:
+    - Description: AnythingLLM web UI (self-hosted mode)
+      Protocol: TCP
+      Ports:
+        - 3001
+      BindAddress: '0.0.0.0'
+      Domains: []
+    - Description: Cloud LLM API calls (if configured with OpenAI/Anthropic/etc.)
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.openai.com
+        - api.anthropic.com
+
+  Persistence:
+    - OS: Linux
+      Type: Service
+      Path: /etc/systemd/system/anythingllm.service
+      Description: AnythingLLM systemd service for persistent self-hosted deployment
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for AnythingLLM.exe
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/anythingllm_process.yml
+      Description: Detects AnythingLLM process creation or Node.js running AnythingLLM backend
+    - Path: detections/sigma/anythingllm_network.yml
+      Description: Detects AnythingLLM listening on port 3001
+
+References:
+  - https://anythingllm.com
+  - https://github.com/Mintplex-Labs/anything-llm
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

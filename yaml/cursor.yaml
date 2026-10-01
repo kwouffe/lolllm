@@ -1,0 +1,133 @@
+Name: Cursor
+Category: CloudAPIClient
+Description: |
+  Cursor is a VS Code fork with deeply integrated AI capabilities (Claude, GPT-4,
+  cursor-small). Unlike VS Code extensions, Cursor ships its own application
+  binary with AI features hardcoded — there is no way to disable AI without
+  removing the application. Cursor sends code context to api2.cursor.sh and
+  routes requests to Anthropic and OpenAI backends. It stores its own
+  configuration and extension data separately from VS Code. The distinct
+  application binary and Cursor-specific API domains make it more detectable
+  than VS Code extensions.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://cursor.com
+  License: Proprietary
+  Privileges: user
+  Free: false
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: /Applications/Cursor.app/Contents/MacOS/Cursor
+      Description: Cursor application binary (macOS)
+      OS: macOS
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\Programs\cursor\Cursor.exe
+      Description: Cursor application binary (Windows)
+      OS: Windows
+      Type: Binary
+    - Path: /usr/bin/cursor
+      Description: Cursor binary (Linux system install)
+      OS: Linux
+      Type: Binary
+    - Path: ~/.config/Cursor/
+      Description: Cursor configuration directory including settings and AI API configuration (Linux)
+      OS: Linux
+      Type: Config
+    - Path: ~/Library/Application Support/Cursor/
+      Description: Cursor application data and configuration (macOS)
+      OS: macOS
+      Type: Config
+    - Path: C:\Users\*\AppData\Roaming\Cursor\
+      Description: Cursor application data (Windows)
+      OS: Windows
+      Type: Config
+    - Path: ~/.cursor/extensions/
+      Description: Cursor-specific extensions directory (separate from VS Code)
+      OS: Linux
+      Type: Cache
+
+  ModelStorage: []
+
+  Process:
+    - Name: Cursor
+      Description: Main Cursor application process (VS Code fork)
+      CLI:
+        - Pattern: 'Cursor\s+--type=extensionHost'
+          Description: Cursor extension host process (AI features run here)
+      ParentProcess: launchd
+    - Name: cursor
+      Description: Cursor CLI launcher (Linux/macOS)
+      CLI:
+        - Pattern: '^cursor\s+'
+          Description: Cursor launched from terminal
+      ParentProcess: bash
+
+  Network:
+    - Description: Cursor AI backend proxy — primary inference endpoint
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api2.cursor.sh
+        - api.cursor.sh
+        - cursor.sh
+    - Description: Forwarded requests to Anthropic and OpenAI via Cursor proxy
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.anthropic.com
+        - api.openai.com
+
+  Persistence:
+    - OS: macOS
+      Type: LaunchAgent
+      Path: ~/Library/LaunchAgents/sh.cursor.Cursor.plist
+      Description: Cursor LaunchAgent for auto-start
+    - OS: Windows
+      Type: Registry
+      Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Cursor
+      Description: Cursor auto-start registry key
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for Cursor.exe
+    - EventID: 5156
+      ProviderName: Microsoft-Windows-Security-Auditing
+      LogFile: Security.evtx
+      Description: Network connection from Cursor.exe to api2.cursor.sh:443
+
+  Registry:
+    - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Cursor
+      Description: Cursor auto-start persistence key
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/cursor_network.yml
+      Description: Detects Cursor connecting to api2.cursor.sh or cursor.sh
+    - Path: detections/sigma/cursor_process.yml
+      Description: Detects Cursor.exe process creation
+
+References:
+  - https://cursor.com
+  - https://docs.cursor.com
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

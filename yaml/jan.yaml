@@ -1,0 +1,132 @@
+Name: Jan
+Category: InferenceEngine
+Description: |
+  Jan is an open-source, offline-first Electron desktop application for running
+  local LLMs. It provides a ChatGPT-like interface, downloads models from Hugging
+  Face and Jan's own model hub, and exposes a local OpenAI-compatible API server
+  on port 1337. Jan stores models and conversation history in ~/jan/ with a
+  predictable directory structure. It supports direct integration with cloud APIs
+  (OpenAI, Anthropic) via its API configuration, making it usable as both a
+  local inference client and a cloud API proxy.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://jan.ai
+  License: Apache-2.0
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - LocalInference
+    - APIServer
+    - ModelDownload
+    - GPUAcceleration
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: /Applications/Jan.app/Contents/MacOS/Jan
+      Description: Jan Electron binary (macOS)
+      OS: macOS
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\Programs\Jan\Jan.exe
+      Description: Jan Electron binary (Windows)
+      OS: Windows
+      Type: Binary
+    - Path: ~/jan/models/
+      Description: Downloaded model directory — GGUF files organised by model ID
+      OS: Any
+      Type: Cache
+    - Path: ~/jan/threads/
+      Description: Conversation thread history files — may contain sensitive data
+      OS: Any
+      Type: Log
+    - Path: ~/jan/settings/
+      Description: Jan application settings including API key configuration
+      OS: Any
+      Type: Config
+    - Path: ~/jan/engines/
+      Description: Engine configuration files (llama.cpp, remote API endpoints)
+      OS: Any
+      Type: Config
+
+  ModelStorage:
+    - Path: ~/jan/models/**/*.gguf
+      Description: GGUF model weight files downloaded by Jan
+      OS: Any
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+
+  Process:
+    - Name: Jan
+      Description: Main Electron application process
+      CLI:
+        - Pattern: 'Jan'
+          Description: Main application
+      ParentProcess: launchd
+    - Name: nitro
+      Description: Jan's embedded llama.cpp inference server process (older versions)
+      CLI:
+        - Pattern: 'nitro.*--model\s+'
+          Description: Nitro inference subprocess loading a model
+      ParentProcess: Jan
+
+  Network:
+    - Description: Local OpenAI-compatible API server
+      Protocol: TCP
+      Ports:
+        - 1337
+      BindAddress: '127.0.0.1'
+      Domains: []
+    - Description: Jan model hub and Hugging Face downloads
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - jan.ai
+        - huggingface.co
+
+  Persistence:
+    - OS: macOS
+      Type: LaunchAgent
+      Path: ~/Library/LaunchAgents/ai.jan.plist
+      Description: Optional Jan LaunchAgent for auto-start
+    - OS: Windows
+      Type: Registry
+      Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Jan
+      Description: Auto-start registry key
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for Jan.exe or nitro.exe
+
+  Registry:
+    - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Jan
+      Description: Auto-start key written by Jan installer
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/jan_model_download.yml
+      Description: Detects Jan connecting to jan.ai or Hugging Face for model downloads
+    - Path: detections/sigma/jan_api_server.yml
+      Description: Detects Jan local API server on port 1337
+
+References:
+  - https://jan.ai
+  - https://github.com/janhq/jan
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

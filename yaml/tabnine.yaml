@@ -1,0 +1,122 @@
+Name: Tabnine
+Category: CloudAPIClient
+Description: |
+  Tabnine is an AI code completion tool available as extensions for VS Code,
+  JetBrains, Vim/Neovim, and other IDEs. It offers both a local inference mode
+  (small model runs on-device) and a cloud mode (code sent to Tabnine's servers).
+  Enterprise deployments can use a self-hosted Tabnine server. The local model
+  binary is stored in ~/.tabnine/ and is a rare case where meaningful detection
+  can pivot on a local AI model binary rather than network traffic. In cloud mode,
+  code context is sent to api.tabnine.com. The binary download and update
+  mechanism also provides a detection opportunity.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://tabnine.com
+  License: Proprietary
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: ~/.tabnine/
+      Description: >
+        Tabnine data directory containing local model binaries, cache, and
+        authentication tokens. Model files are ~300MB–1GB neural network weights.
+      OS: Any
+      Type: Cache
+    - Path: ~/.tabnine/TabNine
+      Description: Tabnine language server binary (Linux/macOS)
+      OS: Linux
+      Type: Binary
+    - Path: C:\Users\*\AppData\Roaming\Tabnine\
+      Description: Tabnine data directory on Windows
+      OS: Windows
+      Type: Cache
+    - Path: ~/.vscode/extensions/tabnine.tabnine-vscode-*/
+      Description: Tabnine VS Code extension directory (Linux/macOS)
+      OS: Linux
+      Type: Cache
+    - Path: C:\Users\*\.vscode\extensions\tabnine.tabnine-vscode-*\
+      Description: Tabnine VS Code extension directory (Windows)
+      OS: Windows
+      Type: Cache
+
+  ModelStorage:
+    - Path: ~/.tabnine/models/
+      Description: Tabnine local model weights — neural network files used for on-device inference
+      OS: Any
+      Format: Proprietary
+
+  Process:
+    - Name: TabNine
+      Description: Tabnine language server process (local inference daemon)
+      CLI:
+        - Pattern: 'TabNine\s+'
+          Description: Tabnine language server running local model inference
+        - Pattern: 'TabNine.*--log-file'
+          Description: Tabnine with logging enabled
+      ParentProcess: code
+    - Name: code
+      Description: VS Code extension host — Tabnine extension loaded here
+      CLI:
+        - Pattern: 'code\s+--type=extensionHost'
+          Description: VS Code extension host
+      ParentProcess: code
+
+  Network:
+    - Description: Tabnine cloud API (cloud mode completions and authentication)
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.tabnine.com
+        - update.tabnine.com
+        - tabnine.com
+    - Description: Tabnine model and binary update downloads
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - update.tabnine.com
+
+  Persistence: []
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for TabNine.exe language server
+    - EventID: 5156
+      ProviderName: Microsoft-Windows-Security-Auditing
+      LogFile: Security.evtx
+      Description: Network connection from TabNine.exe to api.tabnine.com
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/tabnine_process.yml
+      Description: Detects Tabnine language server process creation
+    - Path: detections/sigma/tabnine_network.yml
+      Description: Detects Tabnine connecting to api.tabnine.com in cloud mode
+
+References:
+  - https://tabnine.com
+  - https://docs.tabnine.com
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

@@ -1,0 +1,132 @@
+Name: Codeium / Windsurf
+Category: CloudAPIClient
+Description: |
+  Codeium is an AI code completion service delivered as a VS Code extension and
+  as Windsurf — a standalone VS Code fork similar to Cursor. Both products
+  send code context to Codeium's backend infrastructure (server.codeium.com).
+  Windsurf additionally includes "Cascade" — an agentic AI mode that can execute
+  terminal commands, read/write files, and perform multi-step tasks autonomously.
+  Cascade represents a significant escalation in risk compared to simple code
+  completion. Enterprise deployments may use a self-hosted backend, but the
+  default cloud endpoints are the primary forensic indicators.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://codeium.com
+  License: Proprietary
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: ~/.vscode/extensions/codeium.codeium-*/
+      Description: Codeium VS Code extension directory (Linux/macOS)
+      OS: Linux
+      Type: Cache
+    - Path: C:\Users\*\.vscode\extensions\codeium.codeium-*\
+      Description: Codeium VS Code extension directory (Windows)
+      OS: Windows
+      Type: Cache
+    - Path: /Applications/Windsurf.app/Contents/MacOS/Windsurf
+      Description: Windsurf standalone application binary (macOS)
+      OS: macOS
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\Programs\windsurf\Windsurf.exe
+      Description: Windsurf standalone application binary (Windows)
+      OS: Windows
+      Type: Binary
+    - Path: ~/.codeium/
+      Description: Codeium configuration and authentication token storage
+      OS: Linux
+      Type: Config
+    - Path: C:\Users\*\AppData\Roaming\Codeium\
+      Description: Codeium application data and auth tokens (Windows)
+      OS: Windows
+      Type: Config
+    - Path: ~/.config/Windsurf/
+      Description: Windsurf configuration directory (Linux)
+      OS: Linux
+      Type: Config
+
+  ModelStorage: []
+
+  Process:
+    - Name: Windsurf
+      Description: Windsurf standalone application (VS Code fork)
+      CLI:
+        - Pattern: 'Windsurf\s+'
+          Description: Windsurf application process
+      ParentProcess: launchd
+    - Name: code
+      Description: VS Code extension host for Codeium extension
+      CLI:
+        - Pattern: 'code\s+--type=extensionHost'
+          Description: VS Code extension host running Codeium
+      ParentProcess: code
+
+  Network:
+    - Description: Codeium primary AI inference backend
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - server.codeium.com
+        - api.codeium.com
+        - codeium.com
+    - Description: Codeium authentication and account services
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - auth.codeium.com
+
+  Persistence:
+    - OS: macOS
+      Type: LaunchAgent
+      Path: ~/Library/LaunchAgents/com.codeium.Windsurf.plist
+      Description: Windsurf LaunchAgent for auto-start
+    - OS: Windows
+      Type: Registry
+      Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Windsurf
+      Description: Windsurf auto-start registry key
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for Windsurf.exe
+    - EventID: 5156
+      ProviderName: Microsoft-Windows-Security-Auditing
+      LogFile: Security.evtx
+      Description: Network connection from Windsurf.exe or Code.exe to server.codeium.com
+
+  Registry:
+    - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Windsurf
+      Description: Windsurf auto-start persistence key
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/codeium_windsurf_network.yml
+      Description: Detects connections to server.codeium.com from any process
+    - Path: detections/sigma/codeium_windsurf_process.yml
+      Description: Detects Windsurf.exe process creation
+
+References:
+  - https://codeium.com
+  - https://codeium.com/windsurf
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

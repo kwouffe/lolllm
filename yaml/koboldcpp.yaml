@@ -1,0 +1,101 @@
+Name: KoboldCpp
+Category: InferenceEngine
+Description: |
+  KoboldCpp is a single-file executable wrapping llama.cpp with a web UI and
+  API server, popular in communities focused on creative writing and uncensored
+  model use. It ships as a self-contained binary (no installer) for Windows and
+  Linux, exposes a web interface on port 5001, and implements the KoboldAI API
+  alongside a partial OpenAI-compatible API. Its single-binary nature and lack
+  of standard install path make traditional file-based detection unreliable.
+  The port 5001 listener and GGUF model files are the most reliable indicators.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://github.com/LostRuins/koboldcpp
+  License: AGPL-3.0
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - LocalInference
+    - APIServer
+    - GPUAcceleration
+
+Artifacts:
+
+  Disk:
+    - Path: koboldcpp
+      Description: KoboldCpp Linux binary (no standard path — runs from any directory)
+      OS: Linux
+      Type: Binary
+    - Path: koboldcpp.exe
+      Description: KoboldCpp Windows binary (no standard install path)
+      OS: Windows
+      Type: Binary
+    - Path: koboldcpp_nocuda.exe
+      Description: KoboldCpp Windows CPU-only variant
+      OS: Windows
+      Type: Binary
+
+  ModelStorage:
+    - Path: '*.gguf'
+      Description: GGUF model files loaded at runtime via --model argument (user-specified path)
+      OS: Any
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+
+  Process:
+    - Name: koboldcpp
+      Description: Main KoboldCpp inference and web server process
+      CLI:
+        - Pattern: 'koboldcpp.*--model\s+\S+\.gguf'
+          Description: Loading a GGUF model
+        - Pattern: 'koboldcpp.*--host\s+0\.0\.0\.0'
+          Description: API exposed beyond localhost
+        - Pattern: 'koboldcpp.*--port\s+\d+'
+          Description: Running on non-default port
+      ParentProcess: bash
+
+  Network:
+    - Description: KoboldCpp web UI and API (KoboldAI + partial OpenAI-compatible)
+      Protocol: TCP
+      Ports:
+        - 5001
+      BindAddress: '127.0.0.1'
+      Domains: []
+
+  Persistence:
+    - OS: Linux
+      Type: Service
+      Path: /etc/systemd/system/koboldcpp.service
+      Description: User-created systemd unit for persistent background operation
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for koboldcpp.exe
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/koboldcpp_process.yml
+      Description: Detects koboldcpp process creation
+    - Path: detections/sigma/koboldcpp_port_listen.yml
+      Description: Detects network listener on port 5001 (KoboldCpp default)
+
+References:
+  - https://github.com/LostRuins/koboldcpp
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

@@ -1,0 +1,123 @@
+Name: AutoGPT
+Category: CloudAPIClient
+Description: |
+  AutoGPT is an open-source agentic AI system that autonomously decomposes
+  goals into tasks and executes them using tool-use: web browsing, file
+  system access, code execution, and external service API calls. It operates
+  as a Python process with persistent memory (JSON/vector database) and can
+  run indefinitely without human interaction. AutoGPT's autonomous multi-step
+  task execution with internet access and local file system manipulation
+  represents one of the highest-risk agentic AI configurations. It requires
+  an OpenAI API key and stores configuration in ai_settings.yaml and .env.
+  Workspace artifacts persist between sessions in auto_gpt_workspace/.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://news.agpt.co
+  License: MIT
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: ./auto_gpt_workspace/
+      Description: >
+        AutoGPT persistent workspace — stores all files created, downloaded,
+        or modified by the agent across sessions. Contains outputs of autonomous actions.
+      OS: Any
+      Type: Log
+    - Path: ./.env
+      Description: AutoGPT environment configuration — contains OPENAI_API_KEY and optionally other credentials
+      OS: Any
+      Type: Config
+    - Path: ./ai_settings.yaml
+      Description: AutoGPT agent configuration — defines agent name, role, and goals
+      OS: Any
+      Type: Config
+    - Path: ~/.config/AutoGPT/
+      Description: AutoGPT global configuration directory (newer versions)
+      OS: Linux
+      Type: Config
+    - Path: ./memory/
+      Description: AutoGPT persistent memory files (JSON or vector database)
+      OS: Any
+      Type: Log
+
+  ModelStorage: []
+
+  Process:
+    - Name: python
+      Description: AutoGPT Python agent process — may run for extended periods performing autonomous tasks
+      CLI:
+        - Pattern: 'python.*autogpt'
+          Description: AutoGPT agent running
+        - Pattern: 'python.*run\s+serve'
+          Description: AutoGPT API server mode (newer versions)
+        - Pattern: 'autogpt\s+'
+          Description: AutoGPT CLI direct invocation
+      ParentProcess: bash
+
+  Network:
+    - Description: OpenAI API — primary LLM inference provider
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.openai.com
+    - Description: Arbitrary internet access via browsing capability
+      Protocol: TCP
+      Ports:
+        - 80
+        - 443
+      BindAddress: ''
+      Domains:
+        - '*'
+    - Description: AutoGPT Platform API (hosted version)
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.agpt.co
+
+  Persistence:
+    - OS: Linux
+      Type: Cron
+      Path: /etc/cron.d/autogpt
+      Description: Cron job running AutoGPT for scheduled autonomous task execution
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Python.exe process running AutoGPT — may spawn child processes for tool use
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/autogpt_process.yml
+      Description: Detects Python running AutoGPT agent
+    - Path: detections/sigma/autogpt_workspace.yml
+      Description: Detects creation of auto_gpt_workspace directory indicating AutoGPT installation
+    - Path: detections/sigma/autogpt_network.yml
+      Description: Detects AutoGPT making broad outbound internet connections via its browsing capability
+
+References:
+  - https://news.agpt.co
+  - https://github.com/Significant-Gravitas/AutoGPT
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

@@ -13,6 +13,7 @@ Description: |
 Author: '@lolllm-project'
 Created: '2025-01-01'
 LastModified: '2025-01-01'
+ReviewStatus: unreviewed
 
 Details:
   Website: https://marketplace.visualstudio.com/items?itemName=Anthropic.claude-code

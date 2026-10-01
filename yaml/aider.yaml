@@ -1,0 +1,131 @@
+Name: Aider
+Category: CloudAPIClient
+Description: |
+  Aider is an open-source terminal-based AI coding assistant that integrates
+  directly with git repositories. It runs as a Python CLI, sends file contents
+  to cloud LLM APIs (OpenAI, Anthropic, and others), and autonomously edits
+  files and creates git commits. Aider can execute shell commands via its
+  /run command. Its agentic nature — reading the full repository, making
+  multi-file edits, and committing code — makes it a high-risk tool for
+  intellectual property exfiltration and supply chain contamination. API keys
+  are stored in the shell environment or in ~/.aider.conf.yml.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://aider.chat
+  License: Apache-2.0
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: ~/.local/bin/aider
+      Description: Aider CLI binary (Linux/macOS pip install)
+      OS: Linux
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\Programs\Python\*\Scripts\aider.exe
+      Description: Aider CLI binary (Windows pip install)
+      OS: Windows
+      Type: Binary
+    - Path: ~/.aider.conf.yml
+      Description: Aider configuration file — may contain API keys and model preferences
+      OS: Any
+      Type: Config
+    - Path: .aider.chat.history.md
+      Description: Per-repository chat history file (created in the working directory)
+      OS: Any
+      Type: Log
+    - Path: .aider/
+      Description: Per-repository Aider state directory
+      OS: Any
+      Type: Log
+    - Path: ~/.aider/
+      Description: Global Aider state and analytics data
+      OS: Any
+      Type: Config
+
+  ModelStorage: []
+
+  Process:
+    - Name: aider
+      Description: Main Aider Python CLI process (may appear as 'python' depending on install)
+      CLI:
+        - Pattern: 'aider\s+'
+          Description: Standard Aider session launch
+        - Pattern: 'aider.*--yes'
+          Description: Aider in non-interactive mode — auto-confirms all changes (automation/scripting)
+        - Pattern: 'aider.*--no-git'
+          Description: Aider without git integration — bypasses commit audit trail
+        - Pattern: 'aider.*--model\s+\S+'
+          Description: Aider with explicit model selection
+      ParentProcess: bash
+    - Name: python
+      Description: Aider running as a Python module
+      CLI:
+        - Pattern: 'python.*-m\s+aider'
+          Description: Aider launched as Python module
+      ParentProcess: bash
+
+  Network:
+    - Description: OpenAI API calls (default model provider)
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.openai.com
+    - Description: Anthropic API calls (Claude models)
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.anthropic.com
+    - Description: Aider telemetry and update checks
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - aider.chat
+
+  Persistence:
+    - OS: Linux
+      Type: Cron
+      Path: ~/.bashrc
+      Description: OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable injection in shell rc
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for aider.exe or python.exe running aider module
+
+  Registry: []
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/aider_process.yml
+      Description: Detects aider process creation or Python running aider module
+    - Path: detections/sigma/aider_network.yml
+      Description: Detects aider making API calls to OpenAI or Anthropic endpoints
+    - Path: detections/sigma/aider_no_git_flag.yml
+      Description: Detects aider --no-git flag bypassing the git commit audit trail
+
+References:
+  - https://aider.chat
+  - https://github.com/paul-gauthier/aider
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

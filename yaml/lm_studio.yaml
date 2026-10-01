@@ -1,0 +1,153 @@
+Name: LM Studio
+Category: InferenceEngine
+Description: |
+  LM Studio is a cross-platform Electron desktop application that provides a
+  graphical interface for downloading, managing, and running GGUF-format models
+  locally. It ships a built-in llama.cpp inference engine and exposes an
+  OpenAI-compatible local server on port 1234. The application downloads model
+  files from Hugging Face Hub, creating large GGUF blobs in a predictable cache
+  directory. Its polished installer and GUI make it accessible to non-technical
+  users, lowering the barrier for covert local LLM deployment on corporate
+  endpoints.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+ReviewStatus: unreviewed
+
+Details:
+  Website: https://lmstudio.ai
+  License: Proprietary
+  Privileges: user
+  Free: true
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - LocalInference
+    - APIServer
+    - ModelDownload
+    - GPUAcceleration
+
+Artifacts:
+
+  Disk:
+    - Path: /Applications/LM Studio.app/Contents/MacOS/LM Studio
+      Description: LM Studio main Electron binary (macOS)
+      OS: macOS
+      Type: Binary
+    - Path: C:\Users\*\AppData\Local\Programs\LM-Studio\LM Studio.exe
+      Description: LM Studio main Electron binary (Windows installer)
+      OS: Windows
+      Type: Binary
+    - Path: ~/AppImages/LM_Studio-*.AppImage
+      Description: LM Studio portable AppImage (Linux)
+      OS: Linux
+      Type: Binary
+    - Path: ~/.cache/lm-studio/models/
+      Description: Default model storage directory on Linux — contains GGUF blobs by Hugging Face repo path
+      OS: Linux
+      Type: Cache
+    - Path: ~/Library/Application Support/LM Studio/models/
+      Description: Default model storage directory on macOS
+      OS: macOS
+      Type: Cache
+    - Path: C:\Users\*\.cache\lm-studio\models\
+      Description: Default model storage directory on Windows
+      OS: Windows
+      Type: Cache
+    - Path: ~/.config/LM Studio/
+      Description: Application configuration directory (Linux)
+      OS: Linux
+      Type: Config
+    - Path: ~/Library/Application Support/LM Studio/
+      Description: Application data directory including config and logs (macOS)
+      OS: macOS
+      Type: Config
+
+  ModelStorage:
+    - Path: ~/.cache/lm-studio/models/**/*.gguf
+      Description: GGUF model blobs downloaded from Hugging Face (Linux/macOS)
+      OS: Linux
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+    - Path: C:\Users\*\.cache\lm-studio\models\**\*.gguf
+      Description: GGUF model blobs (Windows)
+      OS: Windows
+      MagicBytes:
+        - Format: GGUF
+          Hex: '47 47 55 46'
+          Offset: 0
+
+  Process:
+    - Name: LM Studio
+      Description: Main Electron application process
+      CLI:
+        - Pattern: 'LM Studio'
+          Description: Main application process
+      ParentProcess: launchd
+    - Name: lms
+      Description: LM Studio CLI companion binary for server management
+      CLI:
+        - Pattern: 'lms\s+server\s+start'
+          Description: Starting the local inference API server via CLI
+        - Pattern: 'lms\s+load\s+'
+          Description: Loading a model via CLI
+      ParentProcess: bash
+
+  Network:
+    - Description: Local OpenAI-compatible inference API server
+      Protocol: TCP
+      Ports:
+        - 1234
+      BindAddress: '127.0.0.1'
+      Domains: []
+    - Description: Hugging Face model downloads
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - huggingface.co
+        - cdn-lfs.huggingface.co
+        - cdn-lfs-us-1.huggingface.co
+
+  Persistence:
+    - OS: macOS
+      Type: LaunchAgent
+      Path: ~/Library/LaunchAgents/ai.lmstudio.plist
+      Description: Optional LaunchAgent for LM Studio auto-start
+    - OS: Windows
+      Type: Registry
+      Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\LM Studio
+      Description: Auto-start registry key written by Windows installer
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for LM Studio.exe
+
+  Registry:
+    - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\LM Studio
+      Description: Auto-start persistence key
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/lm_studio_network.yml
+      Description: Detects connections from LM Studio to Hugging Face for model downloads
+    - Path: detections/sigma/lm_studio_api_server.yml
+      Description: Detects LM Studio local API server listening on port 1234
+  YARA:
+    - Path: detections/yara/gguf_magic_bytes.yar
+      Description: Matches GGUF model files in LM Studio cache
+
+References:
+  - https://lmstudio.ai
+  - https://lmstudio.ai/docs/local-server
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''
