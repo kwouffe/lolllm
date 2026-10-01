@@ -8,7 +8,7 @@ on:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
 
@@ -25,7 +25,7 @@ jobs:
         run: python scripts/validate.py
 
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: codeberg-small
     needs: validate
     if: github.event_name == 'push'
     steps:
