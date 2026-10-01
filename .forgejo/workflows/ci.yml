@@ -40,11 +40,11 @@ jobs:
       - name: Generate docs
         run: python scripts/generate_docs.py
 
-      - name: Generate feeds
-        run: python scripts/generate_feeds.py
-
       - name: Build site
         run: mkdocs build --strict
+
+      - name: Generate feeds
+        run: python scripts/generate_feeds.py
 
       - name: Deploy to Codeberg Pages
         uses: https://codeberg.org/git-pages/action@2b24bbb7ff943d3c8fe1df91326adec66daea6dd  # v2.2.0

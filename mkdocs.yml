@@ -1,7 +1,7 @@
 site_name: lolllm
 site_description: "Living Off The Land: Large Language Models — community-driven detection repository"
-repo_url: https://github.com/kwouffe/lolllm
-repo_name: emilien/lolllm
+repo_url: https://codeberg.org/Emilien/lolllm
+repo_name: Emilien/lolllm
 docs_dir: docs
 site_dir: site
 
@@ -46,7 +46,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/git-alt
-      link: https://github.com/kwouffe/lolllm
+      link: https://codeberg.org/Emilien/lolllm
 
 nav:
   - Home: index.md

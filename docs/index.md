@@ -19,8 +19,8 @@ lolllm documents the **forensic footprint** of these tools so defenders can dete
 
 Download the machine-readable feeds directly:
 
-- **JSON** — `site/api/tools.json` — full structured data, one object per tool
-- **CSV** — `site/api/tools.csv` — flat lookup table for SIEM ingestion (Elastic, Splunk)
+- **JSON** — [/api/tools.json](https://lolllm.io/api/tools.json) — full structured data, one object per tool
+- **CSV** — [/api/tools.csv](https://lolllm.io/api/tools.csv) — flat lookup table for SIEM ingestion (Elastic, Splunk)
 
 ## Browse Tools
 
