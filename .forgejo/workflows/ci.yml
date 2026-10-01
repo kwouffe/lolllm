@@ -54,7 +54,8 @@ jobs:
           git init -b pages
           git config user.email "ci@lolllm"
           git config user.name "lolllm-ci"
-          git remote add deploy "https://x-token-auth:${GITHUB_TOKEN}@codeberg.org/Emilien/lolllm.git"
+          git remote add deploy "https://codeberg.org/Emilien/lolllm.git"
+          git config "url.https://x-token-auth:${GITHUB_TOKEN}@codeberg.org/.insteadOf" "https://codeberg.org/"
           git add .
           git commit -m "deploy: ${GITHUB_SHA}"
           git push --force deploy pages
