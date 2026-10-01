@@ -47,19 +47,9 @@ jobs:
         run: mkdocs build --strict
 
       - name: Deploy to Codeberg Pages
-        run: |
-          mkdir -p /tmp/deploy
-          cp -r site/. /tmp/deploy/
-          cd /tmp/deploy
-          git init -b pages
-          git config user.email "ci@lolllm"
-          git config user.name "lolllm-ci"
-          git remote add deploy "https://codeberg.org/Emilien/lolllm.git"
-          git config "url.https://x-token-auth:${GITHUB_TOKEN}@codeberg.org/.insteadOf" "https://codeberg.org/"
-          printf 'lolllm.io\nwww.lolllm.io\n' > .domains
-          git add .
-          git commit -m "deploy: ${GITHUB_SHA}"
-          git push --force deploy pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_SHA: ${{ github.sha }}
+        uses: https://codeberg.org/git-pages/action@v2
+        with:
+          site: https://lolllm.io/
+          server: codeberg.page
+          token: ${{ forge.token }}
+          source: site/
