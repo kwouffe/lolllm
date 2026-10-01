@@ -31,7 +31,8 @@ Artifacts:
 
   Disk:
     - Path: llama-cli
-      Description: Interactive CLI for single-turn and chat inference (no standard install path — runs from any directory)
+      Description: Interactive CLI for single-turn and chat inference (no standard install path — runs from
+        any directory)
       OS: Linux
       Type: Binary
     - Path: llama-server
