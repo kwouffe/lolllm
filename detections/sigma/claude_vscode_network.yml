@@ -1,0 +1,31 @@
+title: VS Code Process Connection to Anthropic API
+id: a7b8c9d0-e1f2-3456-abcd-567890123456
+status: experimental
+description: Detects HTTPS connections to api.anthropic.com originating from VS Code
+  or its forks (Cursor, Windsurf), indicating the Claude Code extension is active
+  and communicating with the Anthropic backend. Unlike the CLI, no standalone
+  node.exe process is created — the extension host within Code.exe is the source.
+author: lolllm-project
+date: 2025/01/01
+tags:
+  - attack.exfiltration
+  - attack.t1048.002
+references:
+  - https://github.com/Emilien/lolllm
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    Image|endswith:
+      - '\Code.exe'
+      - '\Cursor.exe'
+      - '\windsurf.exe'
+      - '\VSCodium.exe'
+    DestinationHostname|endswith:
+      - 'api.anthropic.com'
+      - 'statsig.anthropic.com'
+  condition: selection
+falsepositives:
+  - Authorized developer use of the Claude Code VS Code extension
+level: medium

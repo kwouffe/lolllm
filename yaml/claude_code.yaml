@@ -1,0 +1,190 @@
+Name: Claude Code
+Category: CloudAPIClient
+Description: |
+  Claude Code is Anthropic's official AI-assisted CLI and agentic coding tool,
+  installed as a global npm package (@anthropic-ai/claude-code). It runs as a
+  Node.js process, authenticates to api.anthropic.com, and can autonomously read
+  files, execute shell commands, write code, and spawn sub-processes on the
+  endpoint. Unlike passive chat clients, Claude Code operates with the full
+  privileges of the invoking user — making it a high-value artifact for DFIR.
+  Stored API keys in ~/.claude/credentials.json represent a persistent secret
+  with broad Anthropic account access. MCP (Model Context Protocol) servers
+  configured by the user may spawn additional local network listeners.
+Author: '@lolllm-project'
+Created: '2025-01-01'
+LastModified: '2025-01-01'
+
+Details:
+  Website: https://claude.ai/code
+  License: Proprietary
+  Privileges: user
+  Free: false
+  SupportedOS:
+    - Windows
+    - Linux
+    - macOS
+  Capabilities:
+    - RemoteAPIProxy
+
+Artifacts:
+
+  Disk:
+    - Path: /usr/local/bin/claude
+      Description: Claude Code CLI wrapper script (Linux/macOS — system npm install)
+      OS: Linux
+      Type: Binary
+    - Path: ~/.local/bin/claude
+      Description: Claude Code CLI wrapper script (Linux — user-space npm install)
+      OS: Linux
+      Type: Binary
+    - Path: /usr/local/lib/node_modules/@anthropic-ai/claude-code/
+      Description: Claude Code npm package directory (Linux/macOS)
+      OS: Linux
+      Type: Cache
+    - Path: /opt/homebrew/bin/claude
+      Description: Claude Code CLI wrapper script (macOS Apple Silicon via Homebrew npm)
+      OS: macOS
+      Type: Binary
+    - Path: ~/Library/Application Support/claude-code/
+      Description: Claude Code application support directory (macOS)
+      OS: macOS
+      Type: Config
+    - Path: C:\Users\*\AppData\Roaming\npm\claude.cmd
+      Description: Claude Code CLI batch wrapper (Windows — npm global install)
+      OS: Windows
+      Type: Binary
+    - Path: C:\Users\*\AppData\Roaming\npm\claude.ps1
+      Description: Claude Code CLI PowerShell wrapper (Windows)
+      OS: Windows
+      Type: Binary
+    - Path: C:\Users\*\AppData\Roaming\npm\node_modules\@anthropic-ai\claude-code\
+      Description: Claude Code npm package directory (Windows)
+      OS: Windows
+      Type: Cache
+    - Path: ~/.claude/credentials.json
+      Description: >
+        Stored Anthropic API token and OAuth credentials — HIGH VALUE target.
+        Contains long-lived API keys granting full Anthropic account access.
+      OS: Any
+      Type: Config
+    - Path: ~/.claude/settings.json
+      Description: Claude Code configuration including model, permissions, and MCP server definitions
+      OS: Any
+      Type: Config
+    - Path: ~/.claude/projects/
+      Description: Per-project conversation history and context files — may contain exfiltrated data
+      OS: Any
+      Type: Log
+    - Path: ~/.claude/todos/
+      Description: Persisted task lists created during agentic sessions
+      OS: Any
+      Type: Log
+    - Path: ~/.claude/statsig/
+      Description: Local Statsig feature flag cache used by Claude Code telemetry
+      OS: Any
+      Type: Cache
+    - Path: C:\Users\*\.claude\credentials.json
+      Description: Stored Anthropic API token (Windows path)
+      OS: Windows
+      Type: Config
+    - Path: C:\Users\*\.claude\settings.json
+      Description: Claude Code configuration (Windows path)
+      OS: Windows
+      Type: Config
+    - Path: C:\Users\*\.claude\projects\
+      Description: Conversation history (Windows path)
+      OS: Windows
+      Type: Log
+
+  ModelStorage: []
+
+  Process:
+    - Name: node
+      Description: >
+        Claude Code runs as a Node.js process. The CLI wrapper resolves to node
+        executing the Claude Code entry point. Parent is typically an interactive
+        shell; in automated abuse scenarios it may be spawned by scripts or cron.
+      CLI:
+        - Pattern: 'node.*claude-code.*cli'
+          Description: Node process executing the Claude Code CLI entry point
+        - Pattern: 'node.*@anthropic-ai/claude-code'
+          Description: Node process running Claude Code from npm package path
+      ParentProcess: bash
+    - Name: claude
+      Description: >
+        Visible process name on systems where the npm wrapper sets argv[0].
+        On Linux/macOS the shebang wrapper may show as 'claude' in ps output.
+      CLI:
+        - Pattern: '^claude\s*$'
+          Description: Interactive session launch
+        - Pattern: 'claude\s+--print\s+'
+          Description: Non-interactive single-prompt execution (automation / scripting abuse)
+        - Pattern: 'claude\s+--dangerously-skip-permissions'
+          Description: Permissions bypass flag — suppresses all tool-use confirmation prompts
+      ParentProcess: bash
+
+  Network:
+    - Description: Primary Anthropic API — all inference requests
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - api.anthropic.com
+    - Description: Statsig telemetry and feature flag evaluation
+      Protocol: TCP
+      Ports:
+        - 443
+      BindAddress: ''
+      Domains:
+        - statsig.anthropic.com
+        - featuregates.org
+    - Description: MCP local server (optional — user-configured, variable port)
+      Protocol: TCP
+      Ports:
+        - 3000
+        - 8080
+      BindAddress: '127.0.0.1'
+      Domains: []
+
+  Persistence:
+    - OS: Linux
+      Type: Cron
+      Path: ~/.bashrc
+      Description: API key or alias injection into shell rc files for persistent invocation
+    - OS: macOS
+      Type: LaunchAgent
+      Path: ~/Library/LaunchAgents/com.anthropic.claude-code.plist
+      Description: Optional LaunchAgent if Claude Code is configured as a background service
+
+  EventLog:
+    - EventID: 4688
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: Process creation for node.exe executing Claude Code entry point
+    - EventID: 4663
+      ProviderName: Microsoft-Security-Auditing
+      LogFile: Security.evtx
+      Description: File access audit on %USERPROFILE%\.claude\credentials.json
+
+  Registry:
+    - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+      Description: Potential persistence if Claude Code is configured to start at login
+
+Detections:
+  Sigma:
+    - Path: detections/sigma/claude_code_network.yml
+      Description: Detects outbound connections from node.exe to api.anthropic.com
+    - Path: detections/sigma/claude_code_credentials_access.yml
+      Description: Detects access to ~/.claude/credentials.json (API key theft indicator)
+    - Path: detections/sigma/claude_code_permissions_bypass.yml
+      Description: Detects --dangerously-skip-permissions flag suppressing all tool-use prompts
+
+References:
+  - https://claude.ai/code
+  - https://www.npmjs.com/package/@anthropic-ai/claude-code
+  - https://docs.anthropic.com/en/docs/claude-code
+
+Acknowledgements:
+  - Person: lolllm contributors
+    Handle: ''

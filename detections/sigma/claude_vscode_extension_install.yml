@@ -1,0 +1,23 @@
+title: Claude Code VS Code Extension Installation
+id: b8c9d0e1-f2a3-4567-bcde-678901234567
+status: experimental
+description: Detects creation of the Claude Code extension directory within the VS Code
+  extensions folder. Triggers on initial install or update of the extension.
+author: lolllm-project
+date: 2025/01/01
+tags:
+  - attack.persistence
+  - attack.t1176
+references:
+  - https://github.com/Emilien/lolllm
+logsource:
+  category: file_event
+  product: windows
+detection:
+  selection:
+    TargetFilename|contains: '\extensions\anthropic.claude-code'
+    TargetFilename|endswith: '\package.json'
+  condition: selection
+falsepositives:
+  - Authorized installation of the Claude Code extension by developers
+level: low

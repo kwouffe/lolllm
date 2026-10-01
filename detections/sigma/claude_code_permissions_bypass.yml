@@ -1,0 +1,26 @@
+title: Claude Code Permissions Bypass Flag
+id: f6a7b8c9-d0e1-2345-fabc-456789012345
+status: experimental
+description: Detects use of the --dangerously-skip-permissions flag in Claude Code,
+  which disables all interactive confirmation prompts for tool use including file
+  writes, shell command execution, and network access. This flag is a strong
+  indicator of automated or adversarial non-interactive use.
+author: lolllm-project
+date: 2025/01/01
+tags:
+  - attack.execution
+  - attack.t1059
+  - attack.defense_evasion
+  - attack.t1562
+references:
+  - https://github.com/Emilien/lolllm
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    CommandLine|contains: '--dangerously-skip-permissions'
+  condition: selection
+falsepositives:
+  - Authorized CI/CD pipelines using Claude Code non-interactively
+level: high
