@@ -18,7 +18,7 @@
 4. Add any Sigma rules to `detections/sigma/` and YARA rules to `detections/yara/`,
    then reference them from your YAML entry's `Detections` block.
 
-5. Open a merge request. CI will run validation automatically.
+5. Open a pull request on [github.com/kwouffe/lolllm](https://github.com/kwouffe/lolllm). CI will run validation automatically.
 
 ## Naming Convention
 
