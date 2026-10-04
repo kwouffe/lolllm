@@ -35,43 +35,54 @@ Artifacts:
         authentication tokens. Model files are ~300MB–1GB neural network weights.
       OS: Any
       Type: Cache
+      Phase: Install
     - Path: ~/.tabnine/TabNine
       Description: Tabnine language server binary (Linux/macOS)
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\AppData\Roaming\Tabnine\
       Description: Tabnine data directory on Windows
       OS: Windows
       Type: Cache
+      Phase: Install
     - Path: ~/.vscode/extensions/tabnine.tabnine-vscode-*/
       Description: Tabnine VS Code extension directory (Linux/macOS)
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: C:\Users\*\.vscode\extensions\tabnine.tabnine-vscode-*\
       Description: Tabnine VS Code extension directory (Windows)
       OS: Windows
       Type: Cache
+      Phase: Install
 
   ModelStorage:
     - Path: ~/.tabnine/models/
       Description: Tabnine local model weights — neural network files used for on-device inference
       OS: Any
+      Phase: Install
       Format: Proprietary
 
   Process:
     - Name: TabNine
       Description: Tabnine language server process (local inference daemon)
+      Phase: Use
       CLI:
         - Pattern: 'TabNine\s+'
           Description: Tabnine language server running local model inference
+          Phase: Use
         - Pattern: 'TabNine.*--log-file'
           Description: Tabnine with logging enabled
+          Phase: Use
       ParentProcess: code
     - Name: code
       Description: VS Code extension host — Tabnine extension loaded here
+      Phase: Use
       CLI:
         - Pattern: 'code\s+--type=extensionHost'
           Description: VS Code extension host
+          Phase: Use
       ParentProcess: code
 
   Network:
@@ -84,6 +95,7 @@ Artifacts:
         - api.tabnine.com
         - update.tabnine.com
         - tabnine.com
+      Phase: Use
     - Description: Tabnine model and binary update downloads
       Protocol: TCP
       Ports:
@@ -91,6 +103,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - update.tabnine.com
+      Phase: Install
 
   Persistence: []
 
@@ -99,10 +112,12 @@ Artifacts:
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for TabNine.exe language server
+      Phase: Use
     - EventID: 5156
       ProviderName: Microsoft-Windows-Security-Auditing
       LogFile: Security.evtx
       Description: Network connection from TabNine.exe to api.tabnine.com
+      Phase: Use
 
   Registry: []
 
@@ -110,8 +125,10 @@ Detections:
   Sigma:
     - Path: detections/sigma/tabnine_process.yml
       Description: Detects Tabnine language server process creation
+      Phase: Use
     - Path: detections/sigma/tabnine_network.yml
       Description: Detects Tabnine connecting to api.tabnine.com in cloud mode
+      Phase: Use
 
 References:
   - https://tabnine.com

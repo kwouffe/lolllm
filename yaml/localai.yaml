@@ -36,19 +36,23 @@ Artifacts:
       Description: LocalAI single binary (Linux)
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: '*/localai/models/'
       Description: Model configuration and GGUF weight files (relative to config directory)
       OS: Any
       Type: Cache
+      Phase: Install
     - Path: '*/localai/*.yaml'
       Description: Model configuration YAML files specifying model parameters and backends
       OS: Any
       Type: Config
+      Phase: Activation
 
   ModelStorage:
     - Path: '*/localai/models/*.gguf'
       Description: GGUF model weight files
       OS: Any
+      Phase: Install
       MagicBytes:
         - Format: GGUF
           Hex: '47 47 55 46'
@@ -57,11 +61,14 @@ Artifacts:
   Process:
     - Name: local-ai
       Description: LocalAI server binary
+      Phase: Use
       CLI:
         - Pattern: 'local-ai\s+run'
           Description: Starting LocalAI server
+          Phase: Activation
         - Pattern: 'local-ai.*--address\s+0\.0\.0\.0'
           Description: LocalAI exposed on all interfaces
+          Phase: Abuse
       ParentProcess: bash
 
   Network:
@@ -71,18 +78,21 @@ Artifacts:
         - 8080
       BindAddress: '0.0.0.0'
       Domains: []
+      Phase: Use
 
   Persistence:
     - OS: Linux
       Type: Service
       Path: /etc/systemd/system/localai.service
       Description: Systemd unit for persistent LocalAI deployment
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for local-ai binary
+      Phase: Use
 
   Registry: []
 
@@ -90,8 +100,10 @@ Detections:
   Sigma:
     - Path: detections/sigma/localai_process.yml
       Description: Detects local-ai process creation
+      Phase: Use
     - Path: detections/sigma/localai_openai_intercept.yml
       Description: Detects local-ai listening on port 8080 as an OpenAI API replacement
+      Phase: Abuse
 
 References:
   - https://localai.io

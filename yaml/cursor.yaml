@@ -33,45 +33,56 @@ Artifacts:
       Description: Cursor application binary (macOS)
       OS: macOS
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\AppData\Local\Programs\cursor\Cursor.exe
       Description: Cursor application binary (Windows)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: /usr/bin/cursor
       Description: Cursor binary (Linux system install)
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: ~/.config/Cursor/
       Description: Cursor configuration directory including settings and AI API configuration (Linux)
       OS: Linux
       Type: Config
+      Phase: Activation
     - Path: ~/Library/Application Support/Cursor/
       Description: Cursor application data and configuration (macOS)
       OS: macOS
       Type: Config
+      Phase: Activation
     - Path: C:\Users\*\AppData\Roaming\Cursor\
       Description: Cursor application data (Windows)
       OS: Windows
       Type: Config
+      Phase: Activation
     - Path: ~/.cursor/extensions/
       Description: Cursor-specific extensions directory (separate from VS Code)
       OS: Linux
       Type: Cache
+      Phase: Install
 
   ModelStorage: []
 
   Process:
     - Name: Cursor
       Description: Main Cursor application process (VS Code fork)
+      Phase: Use
       CLI:
         - Pattern: 'Cursor\s+--type=extensionHost'
           Description: Cursor extension host process (AI features run here)
+          Phase: Use
       ParentProcess: launchd
     - Name: cursor
       Description: Cursor CLI launcher (Linux/macOS)
+      Phase: Use
       CLI:
         - Pattern: '^cursor\s+'
           Description: Cursor launched from terminal
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -84,6 +95,7 @@ Artifacts:
         - api2.cursor.sh
         - api.cursor.sh
         - cursor.sh
+      Phase: Use
     - Description: Forwarded requests to Anthropic and OpenAI via Cursor proxy
       Protocol: TCP
       Ports:
@@ -92,37 +104,45 @@ Artifacts:
       Domains:
         - api.anthropic.com
         - api.openai.com
+      Phase: Use
 
   Persistence:
     - OS: macOS
       Type: LaunchAgent
       Path: ~/Library/LaunchAgents/sh.cursor.Cursor.plist
       Description: Cursor LaunchAgent for auto-start
+      Phase: Activation
     - OS: Windows
       Type: Registry
       Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Cursor
       Description: Cursor auto-start registry key
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for Cursor.exe
+      Phase: Use
     - EventID: 5156
       ProviderName: Microsoft-Windows-Security-Auditing
       LogFile: Security.evtx
       Description: Network connection from Cursor.exe to api2.cursor.sh:443
+      Phase: Use
 
   Registry:
     - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Cursor
       Description: Cursor auto-start persistence key
+      Phase: Activation
 
 Detections:
   Sigma:
     - Path: detections/sigma/cursor_network.yml
       Description: Detects Cursor connecting to api2.cursor.sh or cursor.sh
+      Phase: Use
     - Path: detections/sigma/cursor_process.yml
       Description: Detects Cursor.exe process creation
+      Phase: Use
 
 References:
   - https://cursor.com

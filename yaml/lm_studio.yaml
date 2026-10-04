@@ -36,39 +36,48 @@ Artifacts:
       Description: LM Studio main Electron binary (macOS)
       OS: macOS
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\AppData\Local\Programs\LM-Studio\LM Studio.exe
       Description: LM Studio main Electron binary (Windows installer)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: ~/AppImages/LM_Studio-*.AppImage
       Description: LM Studio portable AppImage (Linux)
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: ~/.cache/lm-studio/models/
       Description: Default model storage directory on Linux — contains GGUF blobs by Hugging Face repo path
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: ~/Library/Application Support/LM Studio/models/
       Description: Default model storage directory on macOS
       OS: macOS
       Type: Cache
+      Phase: Install
     - Path: C:\Users\*\.cache\lm-studio\models\
       Description: Default model storage directory on Windows
       OS: Windows
       Type: Cache
+      Phase: Install
     - Path: ~/.config/LM Studio/
       Description: Application configuration directory (Linux)
       OS: Linux
       Type: Config
+      Phase: Activation
     - Path: ~/Library/Application Support/LM Studio/
       Description: Application data directory including config and logs (macOS)
       OS: macOS
       Type: Config
+      Phase: Activation
 
   ModelStorage:
     - Path: ~/.cache/lm-studio/models/**/*.gguf
       Description: GGUF model blobs downloaded from Hugging Face (Linux/macOS)
       OS: Linux
+      Phase: Install
       MagicBytes:
         - Format: GGUF
           Hex: '47 47 55 46'
@@ -76,6 +85,7 @@ Artifacts:
     - Path: C:\Users\*\.cache\lm-studio\models\**\*.gguf
       Description: GGUF model blobs (Windows)
       OS: Windows
+      Phase: Install
       MagicBytes:
         - Format: GGUF
           Hex: '47 47 55 46'
@@ -84,17 +94,22 @@ Artifacts:
   Process:
     - Name: LM Studio
       Description: Main Electron application process
+      Phase: Use
       CLI:
         - Pattern: 'LM Studio'
           Description: Main application process
+          Phase: Use
       ParentProcess: launchd
     - Name: lms
       Description: LM Studio CLI companion binary for server management
+      Phase: Use
       CLI:
         - Pattern: 'lms\s+server\s+start'
           Description: Starting the local inference API server via CLI
+          Phase: Activation
         - Pattern: 'lms\s+load\s+'
           Description: Loading a model via CLI
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -104,6 +119,7 @@ Artifacts:
         - 1234
       BindAddress: '127.0.0.1'
       Domains: []
+      Phase: Use
     - Description: Hugging Face model downloads
       Protocol: TCP
       Ports:
@@ -113,36 +129,44 @@ Artifacts:
         - huggingface.co
         - cdn-lfs.huggingface.co
         - cdn-lfs-us-1.huggingface.co
+      Phase: Install
 
   Persistence:
     - OS: macOS
       Type: LaunchAgent
       Path: ~/Library/LaunchAgents/ai.lmstudio.plist
       Description: Optional LaunchAgent for LM Studio auto-start
+      Phase: Activation
     - OS: Windows
       Type: Registry
       Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\LM Studio
       Description: Auto-start registry key written by Windows installer
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for LM Studio.exe
+      Phase: Use
 
   Registry:
     - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\LM Studio
       Description: Auto-start persistence key
+      Phase: Activation
 
 Detections:
   Sigma:
     - Path: detections/sigma/lm_studio_network.yml
       Description: Detects connections from LM Studio to Hugging Face for model downloads
+      Phase: Install
     - Path: detections/sigma/lm_studio_api_server.yml
       Description: Detects LM Studio local API server listening on port 1234
+      Phase: Use
   YARA:
     - Path: detections/yara/gguf_magic_bytes.yar
       Description: Matches GGUF model files in LM Studio cache
+      Phase: Install
 
 References:
   - https://lmstudio.ai

@@ -33,45 +33,56 @@ Artifacts:
       Description: Codeium VS Code extension directory (Linux/macOS)
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: C:\Users\*\.vscode\extensions\codeium.codeium-*\
       Description: Codeium VS Code extension directory (Windows)
       OS: Windows
       Type: Cache
+      Phase: Install
     - Path: /Applications/Windsurf.app/Contents/MacOS/Windsurf
       Description: Windsurf standalone application binary (macOS)
       OS: macOS
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\AppData\Local\Programs\windsurf\Windsurf.exe
       Description: Windsurf standalone application binary (Windows)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: ~/.codeium/
       Description: Codeium configuration and authentication token storage
       OS: Linux
       Type: Config
+      Phase: Activation
     - Path: C:\Users\*\AppData\Roaming\Codeium\
       Description: Codeium application data and auth tokens (Windows)
       OS: Windows
       Type: Config
+      Phase: Activation
     - Path: ~/.config/Windsurf/
       Description: Windsurf configuration directory (Linux)
       OS: Linux
       Type: Config
+      Phase: Activation
 
   ModelStorage: []
 
   Process:
     - Name: Windsurf
       Description: Windsurf standalone application (VS Code fork)
+      Phase: Use
       CLI:
         - Pattern: 'Windsurf\s+'
           Description: Windsurf application process
+          Phase: Use
       ParentProcess: launchd
     - Name: code
       Description: VS Code extension host for Codeium extension
+      Phase: Use
       CLI:
         - Pattern: 'code\s+--type=extensionHost'
           Description: VS Code extension host running Codeium
+          Phase: Use
       ParentProcess: code
 
   Network:
@@ -84,6 +95,7 @@ Artifacts:
         - server.codeium.com
         - api.codeium.com
         - codeium.com
+      Phase: Use
     - Description: Codeium authentication and account services
       Protocol: TCP
       Ports:
@@ -91,37 +103,45 @@ Artifacts:
       BindAddress: ''
       Domains:
         - auth.codeium.com
+      Phase: Activation
 
   Persistence:
     - OS: macOS
       Type: LaunchAgent
       Path: ~/Library/LaunchAgents/com.codeium.Windsurf.plist
       Description: Windsurf LaunchAgent for auto-start
+      Phase: Activation
     - OS: Windows
       Type: Registry
       Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Windsurf
       Description: Windsurf auto-start registry key
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for Windsurf.exe
+      Phase: Use
     - EventID: 5156
       ProviderName: Microsoft-Windows-Security-Auditing
       LogFile: Security.evtx
       Description: Network connection from Windsurf.exe or Code.exe to server.codeium.com
+      Phase: Use
 
   Registry:
     - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Windsurf
       Description: Windsurf auto-start persistence key
+      Phase: Activation
 
 Detections:
   Sigma:
     - Path: detections/sigma/codeium_windsurf_network.yml
       Description: Detects connections to server.codeium.com from any process
+      Phase: Use
     - Path: detections/sigma/codeium_windsurf_process.yml
       Description: Detects Windsurf.exe process creation
+      Phase: Use
 
 References:
   - https://codeium.com

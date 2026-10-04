@@ -31,31 +31,38 @@ Artifacts:
 
   Disk:
     - Path: llama-cli
-      Description: Interactive CLI for single-turn and chat inference (no standard install path — runs from
+      Description: >
+        Interactive CLI for single-turn and chat inference (no standard install path — runs from
         any directory)
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: llama-server
       Description: OpenAI-compatible HTTP inference server binary
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: llama-cli.exe
       Description: Interactive CLI binary (Windows)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: llama-server.exe
       Description: OpenAI-compatible HTTP server binary (Windows)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: llama-quantize
       Description: Model quantization utility — converts models to GGUF format
       OS: Linux
       Type: Binary
+      Phase: Install
 
   ModelStorage:
     - Path: '*.gguf'
       Description: GGUF model files loaded at runtime via --model flag (no fixed path — user-specified)
       OS: Any
+      Phase: Install
       MagicBytes:
         - Format: GGUF
           Hex: '47 47 55 46'
@@ -64,21 +71,28 @@ Artifacts:
   Process:
     - Name: llama-server
       Description: HTTP inference server process — spawned to serve the OpenAI-compatible API
+      Phase: Use
       CLI:
         - Pattern: 'llama-server.*--model\s+\S+\.gguf'
           Description: Server loading a GGUF model file
+          Phase: Use
         - Pattern: 'llama-server.*--port\s+\d+'
           Description: Server bound to a non-default port (default 8080)
+          Phase: Use
         - Pattern: 'llama-server.*--host\s+0\.0\.0\.0'
           Description: Server exposed on all interfaces — lateral movement risk
+          Phase: Abuse
       ParentProcess: bash
     - Name: llama-cli
       Description: Interactive or scripted inference CLI
+      Phase: Use
       CLI:
         - Pattern: 'llama-cli.*--model\s+\S+\.gguf'
           Description: CLI loading a GGUF model
+          Phase: Use
         - Pattern: 'llama-cli.*-p\s+'
           Description: Single-prompt non-interactive execution (scripting/automation)
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -88,18 +102,21 @@ Artifacts:
         - 8080
       BindAddress: '127.0.0.1'
       Domains: []
+      Phase: Use
 
   Persistence:
     - OS: Linux
       Type: Service
       Path: /etc/systemd/system/llama-server.service
       Description: User-created systemd unit to persist llama-server as a background service
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for llama-server.exe or llama-cli.exe
+      Phase: Use
 
   Registry: []
 
@@ -107,11 +124,14 @@ Detections:
   Sigma:
     - Path: detections/sigma/llama_cpp_server_expose.yml
       Description: Detects llama-server bound to 0.0.0.0 (exposed beyond localhost)
+      Phase: Abuse
     - Path: detections/sigma/llama_cpp_process.yml
       Description: Detects llama-cli or llama-server process creation
+      Phase: Use
   YARA:
     - Path: detections/yara/gguf_magic_bytes.yar
       Description: Matches GGUF model files loaded by llama.cpp
+      Phase: Install
 
 References:
   - https://github.com/ggerganov/llama.cpp

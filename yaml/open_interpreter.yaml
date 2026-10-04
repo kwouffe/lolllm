@@ -33,35 +33,45 @@ Artifacts:
       Description: Open Interpreter CLI binary (Linux/macOS pip install)
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\AppData\Local\Programs\Python\*\Scripts\interpreter.exe
       Description: Open Interpreter CLI binary (Windows)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: ~/.openinterpreter
       Description: Configuration and session state directory
       OS: Any
       Type: Config
+      Phase: Activation
 
   ModelStorage: []
 
   Process:
     - Name: interpreter
       Description: Open Interpreter main process
+      Phase: Use
       CLI:
         - Pattern: '^interpreter\s*$'
           Description: Interactive session
+          Phase: Use
         - Pattern: 'interpreter.*--os'
           Description: OS mode — gives the LLM control over the entire OS (mouse, keyboard, screen)
+          Phase: Abuse
         - Pattern: 'interpreter.*--force-task-completion'
           Description: Forces the LLM to complete tasks without user confirmation
+          Phase: Abuse
         - Pattern: 'interpreter.*-y'
           Description: Auto-confirms all code execution without prompting
+          Phase: Abuse
       ParentProcess: bash
     - Name: python
       Description: Open Interpreter running as Python module
+      Phase: Use
       CLI:
         - Pattern: 'python.*-m\s+interpreter'
           Description: Open Interpreter as Python module
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -72,6 +82,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.openai.com
+      Phase: Use
     - Description: Anthropic API (Claude models)
       Protocol: TCP
       Ports:
@@ -79,18 +90,21 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.anthropic.com
+      Phase: Use
 
   Persistence:
     - OS: Linux
       Type: Cron
       Path: ~/.bashrc
       Description: API key environment variables in shell rc files
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for interpreter.exe — followed by arbitrary child process spawning
+      Phase: Use
 
   Registry: []
 
@@ -98,10 +112,13 @@ Detections:
   Sigma:
     - Path: detections/sigma/open_interpreter_process.yml
       Description: Detects interpreter process creation
+      Phase: Use
     - Path: detections/sigma/open_interpreter_os_mode.yml
       Description: Detects Open Interpreter --os flag granting LLM full OS control
+      Phase: Abuse
     - Path: detections/sigma/open_interpreter_autoconfirm.yml
       Description: Detects -y or --force-task-completion flags enabling unattended code execution
+      Phase: Abuse
 
 References:
   - https://openinterpreter.com

@@ -36,31 +36,38 @@ Artifacts:
       Description: Jan Electron binary (macOS)
       OS: macOS
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\AppData\Local\Programs\Jan\Jan.exe
       Description: Jan Electron binary (Windows)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: ~/jan/models/
       Description: Downloaded model directory — GGUF files organised by model ID
       OS: Any
       Type: Cache
+      Phase: Install
     - Path: ~/jan/threads/
       Description: Conversation thread history files — may contain sensitive data
       OS: Any
       Type: Log
+      Phase: Use
     - Path: ~/jan/settings/
       Description: Jan application settings including API key configuration
       OS: Any
       Type: Config
+      Phase: Activation
     - Path: ~/jan/engines/
       Description: Engine configuration files (llama.cpp, remote API endpoints)
       OS: Any
       Type: Config
+      Phase: Activation
 
   ModelStorage:
     - Path: ~/jan/models/**/*.gguf
       Description: GGUF model weight files downloaded by Jan
       OS: Any
+      Phase: Install
       MagicBytes:
         - Format: GGUF
           Hex: '47 47 55 46'
@@ -69,15 +76,19 @@ Artifacts:
   Process:
     - Name: Jan
       Description: Main Electron application process
+      Phase: Use
       CLI:
         - Pattern: 'Jan'
           Description: Main application
+          Phase: Use
       ParentProcess: launchd
     - Name: nitro
       Description: Jan's embedded llama.cpp inference server process (older versions)
+      Phase: Use
       CLI:
         - Pattern: 'nitro.*--model\s+'
           Description: Nitro inference subprocess loading a model
+          Phase: Use
       ParentProcess: Jan
 
   Network:
@@ -87,6 +98,7 @@ Artifacts:
         - 1337
       BindAddress: '127.0.0.1'
       Domains: []
+      Phase: Use
     - Description: Jan model hub and Hugging Face downloads
       Protocol: TCP
       Ports:
@@ -95,33 +107,40 @@ Artifacts:
       Domains:
         - jan.ai
         - huggingface.co
+      Phase: Install
 
   Persistence:
     - OS: macOS
       Type: LaunchAgent
       Path: ~/Library/LaunchAgents/ai.jan.plist
       Description: Optional Jan LaunchAgent for auto-start
+      Phase: Activation
     - OS: Windows
       Type: Registry
       Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Jan
       Description: Auto-start registry key
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for Jan.exe or nitro.exe
+      Phase: Use
 
   Registry:
     - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Jan
       Description: Auto-start key written by Jan installer
+      Phase: Activation
 
 Detections:
   Sigma:
     - Path: detections/sigma/jan_model_download.yml
       Description: Detects Jan connecting to jan.ai or Hugging Face for model downloads
+      Phase: Install
     - Path: detections/sigma/jan_api_server.yml
       Description: Detects Jan local API server on port 1337
+      Phase: Use
 
 References:
   - https://jan.ai

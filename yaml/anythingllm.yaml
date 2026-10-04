@@ -35,47 +35,58 @@ Artifacts:
       Description: AnythingLLM Electron desktop application (macOS)
       OS: macOS
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\AppData\Local\Programs\anythingllm\AnythingLLM.exe
       Description: AnythingLLM Electron desktop application (Windows)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: ~/anythingllm/
       Description: AnythingLLM data directory — contains configuration, .env with API keys, and database
       OS: Linux
       Type: Config
+      Phase: Activation
     - Path: ~/anythingllm/storage/anythingllm.db
       Description: >
         SQLite database containing all conversation history, document chunks, vector
         embeddings, and API key configuration. HIGH VALUE forensic artifact.
       OS: Any
       Type: Log
+      Phase: Use
     - Path: ~/anythingllm/.env
       Description: AnythingLLM environment configuration — may contain plaintext API keys
       OS: Any
       Type: Config
+      Phase: Activation
     - Path: ~/anythingllm/storage/documents/
       Description: Uploaded documents staged for RAG processing — may contain sensitive files
       OS: Any
       Type: Log
+      Phase: Use
 
   ModelStorage:
     - Path: ~/anythingllm/storage/models/
       Description: Locally downloaded model files if using built-in model management
       OS: Any
+      Phase: Install
       Format: GGUF
 
   Process:
     - Name: AnythingLLM
       Description: AnythingLLM Electron desktop application
+      Phase: Use
       CLI:
         - Pattern: 'AnythingLLM\s+'
           Description: Desktop application process
+          Phase: Use
       ParentProcess: launchd
     - Name: node
       Description: AnythingLLM server component (Node.js Express backend)
+      Phase: Use
       CLI:
         - Pattern: 'node.*anythingllm'
           Description: AnythingLLM backend server
+          Phase: Use
       ParentProcess: AnythingLLM
 
   Network:
@@ -85,6 +96,7 @@ Artifacts:
         - 3001
       BindAddress: '0.0.0.0'
       Domains: []
+      Phase: Use
     - Description: Cloud LLM API calls (if configured with OpenAI/Anthropic/etc.)
       Protocol: TCP
       Ports:
@@ -93,18 +105,21 @@ Artifacts:
       Domains:
         - api.openai.com
         - api.anthropic.com
+      Phase: Use
 
   Persistence:
     - OS: Linux
       Type: Service
       Path: /etc/systemd/system/anythingllm.service
       Description: AnythingLLM systemd service for persistent self-hosted deployment
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for AnythingLLM.exe
+      Phase: Use
 
   Registry: []
 
@@ -112,8 +127,10 @@ Detections:
   Sigma:
     - Path: detections/sigma/anythingllm_process.yml
       Description: Detects AnythingLLM process creation or Node.js running AnythingLLM backend
+      Phase: Use
     - Path: detections/sigma/anythingllm_network.yml
       Description: Detects AnythingLLM listening on port 3001
+      Phase: Use
 
 References:
   - https://anythingllm.com

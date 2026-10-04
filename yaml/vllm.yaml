@@ -34,19 +34,23 @@ Artifacts:
       Description: vLLM Python package installation directory
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: ~/.cache/huggingface/hub/
       Description: Hugging Face model cache — contains model shards downloaded by vLLM
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: C:\Users\*\.cache\huggingface\hub\
       Description: Hugging Face model cache (Windows)
       OS: Windows
       Type: Cache
+      Phase: Install
 
   ModelStorage:
     - Path: ~/.cache/huggingface/hub/**/*.safetensors
       Description: safetensors model shards downloaded from Hugging Face
       OS: Linux
+      Phase: Install
       MagicBytes:
         - Format: safetensors
           Hex: '7B 22 5F 5F 6D 65 74 61 64 61 74 61 5F 5F 22'
@@ -55,13 +59,17 @@ Artifacts:
   Process:
     - Name: python
       Description: Python process running vLLM entrypoint as an API server
+      Phase: Use
       CLI:
         - Pattern: 'python.*-m\s+vllm\.entrypoints\.openai\.api_server'
           Description: vLLM OpenAI-compatible API server
+          Phase: Activation
         - Pattern: 'python.*-m\s+vllm\.entrypoints\.api_server'
           Description: vLLM native API server (older versions)
+          Phase: Activation
         - Pattern: 'python.*vllm.*--model\s+\S+'
           Description: vLLM server loading a specific model
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -71,6 +79,7 @@ Artifacts:
         - 8000
       BindAddress: '0.0.0.0'
       Domains: []
+      Phase: Use
     - Description: Hugging Face model downloads
       Protocol: TCP
       Ports:
@@ -79,18 +88,21 @@ Artifacts:
       Domains:
         - huggingface.co
         - cdn-lfs.huggingface.co
+      Phase: Install
 
   Persistence:
     - OS: Linux
       Type: Service
       Path: /etc/systemd/system/vllm.service
       Description: Systemd unit to run vLLM as a persistent background service
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for python.exe with vllm entrypoint arguments
+      Phase: Use
 
   Registry: []
 
@@ -98,8 +110,10 @@ Detections:
   Sigma:
     - Path: detections/sigma/vllm_process.yml
       Description: Detects Python process running the vLLM API server entrypoint
+      Phase: Use
     - Path: detections/sigma/vllm_hf_download.yml
       Description: Detects connections to Hugging Face during vLLM model download
+      Phase: Install
 
 References:
   - https://docs.vllm.ai

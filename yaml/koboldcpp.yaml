@@ -34,19 +34,23 @@ Artifacts:
       Description: KoboldCpp Linux binary (no standard path — runs from any directory)
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: koboldcpp.exe
       Description: KoboldCpp Windows binary (no standard install path)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: koboldcpp_nocuda.exe
       Description: KoboldCpp Windows CPU-only variant
       OS: Windows
       Type: Binary
+      Phase: Install
 
   ModelStorage:
     - Path: '*.gguf'
       Description: GGUF model files loaded at runtime via --model argument (user-specified path)
       OS: Any
+      Phase: Install
       MagicBytes:
         - Format: GGUF
           Hex: '47 47 55 46'
@@ -55,13 +59,17 @@ Artifacts:
   Process:
     - Name: koboldcpp
       Description: Main KoboldCpp inference and web server process
+      Phase: Use
       CLI:
         - Pattern: 'koboldcpp.*--model\s+\S+\.gguf'
           Description: Loading a GGUF model
+          Phase: Use
         - Pattern: 'koboldcpp.*--host\s+0\.0\.0\.0'
           Description: API exposed beyond localhost
+          Phase: Abuse
         - Pattern: 'koboldcpp.*--port\s+\d+'
           Description: Running on non-default port
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -71,18 +79,21 @@ Artifacts:
         - 5001
       BindAddress: '127.0.0.1'
       Domains: []
+      Phase: Use
 
   Persistence:
     - OS: Linux
       Type: Service
       Path: /etc/systemd/system/koboldcpp.service
       Description: User-created systemd unit for persistent background operation
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for koboldcpp.exe
+      Phase: Use
 
   Registry: []
 
@@ -90,8 +101,10 @@ Detections:
   Sigma:
     - Path: detections/sigma/koboldcpp_process.yml
       Description: Detects koboldcpp process creation
+      Phase: Use
     - Path: detections/sigma/koboldcpp_port_listen.yml
       Description: Detects network listener on port 5001 (KoboldCpp default)
+      Phase: Use
 
 References:
   - https://github.com/LostRuins/koboldcpp

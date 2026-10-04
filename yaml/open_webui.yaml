@@ -34,25 +34,31 @@ Artifacts:
       Description: Open WebUI data directory including SQLite database with conversations and API keys (Linux)
       OS: Linux
       Type: Config
+      Phase: Activation
     - Path: ~/.local/share/open-webui/webui.db
       Description: SQLite database containing user accounts, conversation history, and stored API keys
       OS: Linux
       Type: Log
+      Phase: Use
     - Path: '*/open-webui/backend/'
       Description: Open WebUI Python backend source (if installed from source)
       OS: Any
       Type: Binary
+      Phase: Install
 
   ModelStorage: []
 
   Process:
     - Name: python
       Description: Open WebUI Python backend server (uvicorn)
+      Phase: Use
       CLI:
         - Pattern: 'uvicorn.*open_webui'
           Description: Open WebUI backend server via uvicorn
+          Phase: Use
         - Pattern: 'python.*open_webui'
           Description: Direct Python invocation of Open WebUI
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -63,24 +69,28 @@ Artifacts:
         - 8080
       BindAddress: '0.0.0.0'
       Domains: []
+      Phase: Use
     - Description: Backend connection to Ollama
       Protocol: TCP
       Ports:
         - 11434
       BindAddress: ''
       Domains: []
+      Phase: Use
 
   Persistence:
     - OS: Linux
       Type: Service
       Path: /etc/systemd/system/open-webui.service
       Description: Systemd unit for persistent Open WebUI deployment
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for python.exe running uvicorn with open-webui
+      Phase: Use
 
   Registry: []
 
@@ -88,8 +98,10 @@ Detections:
   Sigma:
     - Path: detections/sigma/open_webui_process.yml
       Description: Detects uvicorn or Python process running Open WebUI
+      Phase: Use
     - Path: detections/sigma/open_webui_port.yml
       Description: Detects Open WebUI network listener on port 3000
+      Phase: Use
 
 References:
   - https://openwebui.com

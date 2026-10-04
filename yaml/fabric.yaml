@@ -33,39 +33,49 @@ Artifacts:
       Description: Fabric CLI binary (Linux/macOS — go install or pip)
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\go\bin\fabric.exe
       Description: Fabric CLI binary (Windows — go install)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: ~/.config/fabric/.env
       Description: >
         Fabric environment file containing API keys for OpenAI, Anthropic, Google,
         and other providers — HIGH VALUE credential target.
       OS: Any
       Type: Config
+      Phase: Activation
     - Path: ~/.config/fabric/patterns/
       Description: Pattern library — LLM prompt templates, downloaded from GitHub
       OS: Any
       Type: Config
+      Phase: Install
     - Path: ~/.config/fabric/fabric.db
       Description: Fabric SQLite database storing sessions and history
       OS: Any
       Type: Log
+      Phase: Use
 
   ModelStorage: []
 
   Process:
     - Name: fabric
       Description: Fabric CLI process — typically short-lived, invoked in shell pipelines
+      Phase: Use
       CLI:
         - Pattern: 'fabric\s+--pattern\s+\S+'
           Description: Standard fabric pattern invocation
+          Phase: Use
         - Pattern: 'fabric\s+--setup'
           Description: Fabric setup — configures API keys
+          Phase: Activation
         - Pattern: 'fabric\s+--update'
           Description: Pattern library update from GitHub
+          Phase: Install
         - Pattern: 'fabric\s+--stream'
           Description: Streaming output mode — often used in automated pipelines
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -76,6 +86,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.openai.com
+      Phase: Use
     - Description: Anthropic API
       Protocol: TCP
       Ports:
@@ -83,6 +94,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.anthropic.com
+      Phase: Use
     - Description: Pattern library downloads from GitHub
       Protocol: TCP
       Ports:
@@ -91,18 +103,21 @@ Artifacts:
       Domains:
         - raw.githubusercontent.com
         - github.com
+      Phase: Install
 
   Persistence:
     - OS: Linux
       Type: Cron
       Path: /etc/cron.d/fabric
       Description: Cron job invoking fabric for scheduled automated text processing
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for fabric.exe
+      Phase: Use
 
   Registry: []
 
@@ -110,8 +125,10 @@ Detections:
   Sigma:
     - Path: detections/sigma/fabric_process.yml
       Description: Detects fabric process creation with --pattern flag
+      Phase: Use
     - Path: detections/sigma/fabric_credentials_file.yml
       Description: Detects access to ~/.config/fabric/.env (API key credential file)
+      Phase: Abuse
 
 References:
   - https://github.com/danielmiessler/fabric

@@ -34,31 +34,38 @@ Artifacts:
       Description: GPT4All Electron binary (macOS)
       OS: macOS
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\AppData\Local\Programs\GPT4All\GPT4All.exe
       Description: GPT4All installer binary (Windows)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: ~/Applications/GPT4All-*.AppImage
       Description: GPT4All portable AppImage (Linux)
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\AppData\Local\nomic.ai\GPT4All\
       Description: Model storage and application data (Windows)
       OS: Windows
       Type: Cache
+      Phase: Install
     - Path: ~/.local/share/nomic.ai/GPT4All/
       Description: Model storage and application data (Linux)
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: ~/Library/Application Support/nomic.ai/GPT4All/
       Description: Model storage and application data (macOS)
       OS: macOS
       Type: Cache
+      Phase: Install
 
   ModelStorage:
     - Path: C:\Users\*\AppData\Local\nomic.ai\GPT4All\*.gguf
       Description: Downloaded GGUF model files (Windows)
       OS: Windows
+      Phase: Install
       MagicBytes:
         - Format: GGUF
           Hex: '47 47 55 46'
@@ -66,6 +73,7 @@ Artifacts:
     - Path: ~/.local/share/nomic.ai/GPT4All/*.gguf
       Description: Downloaded GGUF model files (Linux)
       OS: Linux
+      Phase: Install
       MagicBytes:
         - Format: GGUF
           Hex: '47 47 55 46'
@@ -74,9 +82,11 @@ Artifacts:
   Process:
     - Name: GPT4All
       Description: Main Electron application process
+      Phase: Use
       CLI:
         - Pattern: 'GPT4All'
           Description: Main application process
+          Phase: Use
       ParentProcess: explorer.exe
 
   Network:
@@ -88,32 +98,39 @@ Artifacts:
       Domains:
         - gpt4all.io
         - huggingface.co
+      Phase: Install
 
   Persistence:
     - OS: Windows
       Type: Registry
       Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\GPT4All
       Description: Auto-start registry key (if enabled by user)
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for GPT4All.exe
+      Phase: Use
 
   Registry:
     - Path: HKCU\Software\nomic.ai\GPT4All
       Description: GPT4All application settings and configuration
+      Phase: Activation
 
 Detections:
   Sigma:
     - Path: detections/sigma/gpt4all_model_download.yml
       Description: Detects connections to gpt4all.io for model downloads
+      Phase: Install
     - Path: detections/sigma/gpt4all_process.yml
       Description: Detects GPT4All process creation
+      Phase: Use
   YARA:
     - Path: detections/yara/gguf_magic_bytes.yar
       Description: Matches GGUF model files in the Nomic AI data directory
+      Phase: Install
 
 References:
   - https://gpt4all.io

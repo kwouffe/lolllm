@@ -38,11 +38,13 @@ Artifacts:
         to hide its nature.
       OS: Any
       Type: Binary
+      Phase: Install
 
   ModelStorage:
     - Path: '*.llamafile'
       Description: The llamafile itself contains an embedded GGUF model at a fixed internal offset
       OS: Any
+      Phase: Install
       MagicBytes:
         - Format: GGUF
           Hex: '47 47 55 46'
@@ -54,13 +56,17 @@ Artifacts:
         May appear under any name since the file can be renamed. On Linux/macOS
         the process name reflects the filename. On Windows, any .exe with GGUF
         magic bytes at offset 0 is suspect.
+      Phase: Use
       CLI:
         - Pattern: '.*\.llamafile.*--server'
           Description: Explicit server mode
+          Phase: Use
         - Pattern: '.*\.llamafile.*--host\s+0\.0\.0\.0'
           Description: API exposed beyond localhost
+          Phase: Abuse
         - Pattern: '.*\.llamafile.*-p\s+'
           Description: Non-interactive single-prompt execution
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -70,18 +76,21 @@ Artifacts:
         - 8080
       BindAddress: '127.0.0.1'
       Domains: []
+      Phase: Use
 
   Persistence:
     - OS: Linux
       Type: Service
       Path: /etc/systemd/system/llamafile.service
       Description: User-created systemd unit to run llamafile as a persistent service
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for any executable with GGUF magic bytes — use YARA-on-execution
+      Phase: Use
 
   Registry: []
 
@@ -89,9 +98,11 @@ Detections:
   Sigma:
     - Path: detections/sigma/llamafile_server_expose.yml
       Description: Detects llamafile bound to 0.0.0.0 (API exposed beyond localhost)
+      Phase: Abuse
   YARA:
     - Path: detections/yara/gguf_magic_bytes.yar
       Description: Matches the embedded GGUF header inside the llamafile executable
+      Phase: Install
 
 References:
   - https://github.com/Mozilla-Ocho/llamafile

@@ -1,11 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/kwouffe/lolllm/raw/branch/main/schema/lolllm.schema.json",
+  "$id": "https://github.com/kwouffe/lolllm/raw/main/schema/lolllm.schema.json",
   "title": "lolllm Entry",
   "description": "Schema for a Living Off The Land: Large Language Models tool entry",
   "type": "object",
   "required": ["Name", "Category", "Description", "Author", "Created", "LastModified", "ReviewStatus", "Details", "Artifacts", "Detections"],
   "additionalProperties": false,
+  "$defs": {
+    "phase": {
+      "type": "string",
+      "enum": ["Install", "Activation", "Use", "Abuse"],
+      "description": "Detection phase: Install=tool arrives on disk, Activation=tool configured/enabled, Use=tool actively invoked, Abuse=anomalous/suspicious use"
+    }
+  },
   "properties": {
     "Name": { "type": "string", "minLength": 1 },
     "Category": {
@@ -58,7 +65,8 @@
               "Path": { "type": "string" },
               "Description": { "type": "string" },
               "OS": { "type": "string", "enum": ["Windows", "Linux", "macOS", "Any"] },
-              "Type": { "type": "string", "enum": ["Binary", "Config", "Log", "Cache"] }
+              "Type": { "type": "string", "enum": ["Binary", "Config", "Log", "Cache"] },
+              "Phase": { "$ref": "#/$defs/phase" }
             }
           }
         },
@@ -72,6 +80,7 @@
               "Path": { "type": "string" },
               "Description": { "type": "string" },
               "OS": { "type": "string", "enum": ["Windows", "Linux", "macOS", "Any"] },
+              "Phase": { "$ref": "#/$defs/phase" },
               "MagicBytes": {
                 "type": "array",
                 "items": {
@@ -97,6 +106,7 @@
             "properties": {
               "Name": { "type": "string" },
               "Description": { "type": "string" },
+              "Phase": { "$ref": "#/$defs/phase" },
               "CLI": {
                 "type": "array",
                 "items": {
@@ -105,7 +115,8 @@
                   "additionalProperties": false,
                   "properties": {
                     "Pattern": { "type": "string" },
-                    "Description": { "type": "string" }
+                    "Description": { "type": "string" },
+                    "Phase": { "$ref": "#/$defs/phase" }
                   }
                 }
               },
@@ -124,7 +135,8 @@
               "Protocol": { "type": "string", "enum": ["TCP", "UDP"] },
               "Ports": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 65535 } },
               "BindAddress": { "type": "string" },
-              "Domains": { "type": "array", "items": { "type": "string" } }
+              "Domains": { "type": "array", "items": { "type": "string" } },
+              "Phase": { "$ref": "#/$defs/phase" }
             }
           }
         },
@@ -138,7 +150,8 @@
               "OS": { "type": "string", "enum": ["Windows", "Linux", "macOS"] },
               "Type": { "type": "string", "enum": ["Service", "Registry", "Cron", "LaunchAgent", "LaunchDaemon"] },
               "Path": { "type": "string" },
-              "Description": { "type": "string" }
+              "Description": { "type": "string" },
+              "Phase": { "$ref": "#/$defs/phase" }
             }
           }
         },
@@ -152,7 +165,8 @@
               "EventID": { "type": "integer" },
               "ProviderName": { "type": "string" },
               "LogFile": { "type": "string" },
-              "Description": { "type": "string" }
+              "Description": { "type": "string" },
+              "Phase": { "$ref": "#/$defs/phase" }
             }
           }
         },
@@ -164,7 +178,8 @@
             "additionalProperties": false,
             "properties": {
               "Path": { "type": "string" },
-              "Description": { "type": "string" }
+              "Description": { "type": "string" },
+              "Phase": { "$ref": "#/$defs/phase" }
             }
           }
         }
@@ -182,7 +197,8 @@
             "additionalProperties": false,
             "properties": {
               "Path": { "type": "string", "pattern": "^detections/sigma/.*\\.yml$" },
-              "Description": { "type": "string" }
+              "Description": { "type": "string" },
+              "Phase": { "$ref": "#/$defs/phase" }
             }
           }
         },
@@ -194,7 +210,8 @@
             "additionalProperties": false,
             "properties": {
               "Path": { "type": "string", "pattern": "^detections/yara/.*\\.yar$" },
-              "Description": { "type": "string" }
+              "Description": { "type": "string" },
+              "Phase": { "$ref": "#/$defs/phase" }
             }
           }
         }

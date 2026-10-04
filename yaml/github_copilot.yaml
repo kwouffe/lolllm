@@ -34,45 +34,56 @@ Artifacts:
       Description: GitHub Copilot extension directory (Linux/macOS)
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: ~/.vscode/extensions/github.copilot-chat-*/
       Description: GitHub Copilot Chat extension directory (Linux/macOS)
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: C:\Users\*\.vscode\extensions\github.copilot-*\
       Description: GitHub Copilot extension directory (Windows)
       OS: Windows
       Type: Cache
+      Phase: Install
     - Path: C:\Users\*\.vscode\extensions\github.copilot-chat-*\
       Description: GitHub Copilot Chat extension directory (Windows)
       OS: Windows
       Type: Cache
+      Phase: Install
     - Path: ~/.config/Code/User/globalStorage/github.copilot/
       Description: Copilot global storage including cached OAuth tokens (Linux)
       OS: Linux
       Type: Config
+      Phase: Activation
     - Path: ~/Library/Application Support/Code/User/globalStorage/github.copilot/
       Description: Copilot global storage (macOS)
       OS: macOS
       Type: Config
+      Phase: Activation
     - Path: C:\Users\*\AppData\Roaming\Code\User\globalStorage\github.copilot\
       Description: Copilot global storage including cached OAuth tokens (Windows)
       OS: Windows
       Type: Config
+      Phase: Activation
 
   ModelStorage: []
 
   Process:
     - Name: code
       Description: VS Code extension host process — Copilot runs entirely within Code.exe/code
+      Phase: Use
       CLI:
         - Pattern: 'code\s+--type=extensionHost'
           Description: VS Code extension host where Copilot runs
+          Phase: Use
       ParentProcess: code
     - Name: node
       Description: Some Copilot language server components may spawn a Node.js subprocess
+      Phase: Use
       CLI:
         - Pattern: 'node.*copilot'
           Description: Copilot language server subprocess
+          Phase: Use
       ParentProcess: code
 
   Network:
@@ -85,6 +96,7 @@ Artifacts:
         - copilot-proxy.githubusercontent.com
         - copilot.github.com
         - api.githubcopilot.com
+      Phase: Use
     - Description: GitHub OAuth and telemetry
       Protocol: TCP
       Ports:
@@ -94,33 +106,40 @@ Artifacts:
         - github.com
         - vscode.dev
         - dc.services.visualstudio.com
+      Phase: Activation
 
   Persistence:
     - OS: Windows
       Type: Registry
       Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Code
       Description: VS Code auto-start — Copilot active whenever VS Code launches
+      Phase: Activation
     - OS: macOS
       Type: LaunchAgent
       Path: ~/Library/LaunchAgents/com.microsoft.VSCode.plist
       Description: VS Code LaunchAgent — Copilot loaded at every VS Code startup
+      Phase: Activation
 
   EventLog:
     - EventID: 5156
       ProviderName: Microsoft-Windows-Security-Auditing
       LogFile: Security.evtx
       Description: Network connection from Code.exe to copilot-proxy.githubusercontent.com:443
+      Phase: Use
 
   Registry:
     - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\GitHub Copilot
       Description: Copilot extension registration in Windows registry (if applicable)
+      Phase: Install
 
 Detections:
   Sigma:
     - Path: detections/sigma/github_copilot_network.yml
       Description: Detects VS Code connecting to copilot-proxy.githubusercontent.com
+      Phase: Use
     - Path: detections/sigma/github_copilot_extension_install.yml
       Description: Detects creation of github.copilot extension directory
+      Phase: Install
 
 References:
   - https://github.com/features/copilot

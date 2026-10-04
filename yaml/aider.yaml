@@ -33,47 +33,60 @@ Artifacts:
       Description: Aider CLI binary (Linux/macOS pip install)
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: C:\Users\*\AppData\Local\Programs\Python\*\Scripts\aider.exe
       Description: Aider CLI binary (Windows pip install)
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: ~/.aider.conf.yml
       Description: Aider configuration file — may contain API keys and model preferences
       OS: Any
       Type: Config
+      Phase: Activation
     - Path: .aider.chat.history.md
       Description: Per-repository chat history file (created in the working directory)
       OS: Any
       Type: Log
+      Phase: Use
     - Path: .aider/
       Description: Per-repository Aider state directory
       OS: Any
       Type: Log
+      Phase: Use
     - Path: ~/.aider/
       Description: Global Aider state and analytics data
       OS: Any
       Type: Config
+      Phase: Activation
 
   ModelStorage: []
 
   Process:
     - Name: aider
       Description: Main Aider Python CLI process (may appear as 'python' depending on install)
+      Phase: Use
       CLI:
         - Pattern: 'aider\s+'
           Description: Standard Aider session launch
+          Phase: Use
         - Pattern: 'aider.*--yes'
           Description: Aider in non-interactive mode — auto-confirms all changes (automation/scripting)
+          Phase: Abuse
         - Pattern: 'aider.*--no-git'
           Description: Aider without git integration — bypasses commit audit trail
+          Phase: Abuse
         - Pattern: 'aider.*--model\s+\S+'
           Description: Aider with explicit model selection
+          Phase: Use
       ParentProcess: bash
     - Name: python
       Description: Aider running as a Python module
+      Phase: Use
       CLI:
         - Pattern: 'python.*-m\s+aider'
           Description: Aider launched as Python module
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -84,6 +97,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.openai.com
+      Phase: Use
     - Description: Anthropic API calls (Claude models)
       Protocol: TCP
       Ports:
@@ -91,6 +105,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.anthropic.com
+      Phase: Use
     - Description: Aider telemetry and update checks
       Protocol: TCP
       Ports:
@@ -98,18 +113,21 @@ Artifacts:
       BindAddress: ''
       Domains:
         - aider.chat
+      Phase: Use
 
   Persistence:
     - OS: Linux
       Type: Cron
       Path: ~/.bashrc
       Description: OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable injection in shell rc
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for aider.exe or python.exe running aider module
+      Phase: Use
 
   Registry: []
 
@@ -117,10 +135,13 @@ Detections:
   Sigma:
     - Path: detections/sigma/aider_process.yml
       Description: Detects aider process creation or Python running aider module
+      Phase: Use
     - Path: detections/sigma/aider_network.yml
       Description: Detects aider making API calls to OpenAI or Anthropic endpoints
+      Phase: Use
     - Path: detections/sigma/aider_no_git_flag.yml
       Description: Detects aider --no-git flag bypassing the git commit audit trail
+      Phase: Abuse
 
 References:
   - https://aider.chat

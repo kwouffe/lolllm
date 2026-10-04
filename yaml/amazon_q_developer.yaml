@@ -34,35 +34,44 @@ Artifacts:
       Description: Amazon Q VS Code extension directory (Linux/macOS)
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: C:\Users\*\.vscode\extensions\amazonwebservices.amazon-q-vscode-*\
       Description: Amazon Q VS Code extension directory (Windows)
       OS: Windows
       Type: Cache
+      Phase: Install
     - Path: ~/.aws/sso/cache/
       Description: AWS SSO authentication cache — contains short-lived tokens used by Q Developer
       OS: Any
       Type: Config
+      Phase: Activation
     - Path: ~/.aws/credentials
       Description: AWS credentials file — may contain IAM user credentials used by Q Developer
       OS: Any
       Type: Config
+      Phase: Activation
 
   ModelStorage: []
 
   Process:
     - Name: code
       Description: VS Code extension host running Amazon Q Developer extension
+      Phase: Use
       CLI:
         - Pattern: 'code\s+--type=extensionHost'
           Description: VS Code extension host where Q Developer runs
+          Phase: Use
       ParentProcess: code
     - Name: aws
       Description: AWS CLI with Q Developer integration
+      Phase: Use
       CLI:
         - Pattern: 'aws\s+q\s+'
           Description: AWS CLI invoking Q Developer subcommand
+          Phase: Use
         - Pattern: 'aws\s+codewhisperer\s+'
           Description: Legacy CodeWhisperer CLI commands
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -75,6 +84,7 @@ Artifacts:
         - codewhisperer.us-east-1.amazonaws.com
         - q.us-east-1.amazonaws.com
         - '*.q.amazonaws.com'
+      Phase: Use
     - Description: AWS IAM Identity Center (SSO authentication)
       Protocol: TCP
       Ports:
@@ -83,6 +93,7 @@ Artifacts:
       Domains:
         - '*.awsapps.com'
         - sso.amazonaws.com
+      Phase: Activation
 
   Persistence: []
 
@@ -91,6 +102,7 @@ Artifacts:
       ProviderName: Microsoft-Windows-Security-Auditing
       LogFile: Security.evtx
       Description: Network connection from Code.exe to amazonaws.com endpoints on port 443
+      Phase: Use
 
   Registry: []
 
@@ -98,8 +110,10 @@ Detections:
   Sigma:
     - Path: detections/sigma/amazon_q_developer_network.yml
       Description: Detects connections to Q Developer and CodeWhisperer AWS endpoints
+      Phase: Use
     - Path: detections/sigma/amazon_q_developer_extension.yml
       Description: Detects installation of Amazon Q Developer VS Code extension
+      Phase: Install
 
 References:
   - https://aws.amazon.com/q/developer/

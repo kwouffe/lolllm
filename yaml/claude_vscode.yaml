@@ -34,42 +34,52 @@ Artifacts:
       Description: Claude Code extension directory (Linux/macOS — VS Code stable)
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: ~/.vscode-insiders/extensions/anthropic.claude-code-*/
       Description: Claude Code extension directory (Linux/macOS — VS Code Insiders)
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: ~/.cursor/extensions/anthropic.claude-code-*/
       Description: Claude Code extension directory (Linux/macOS — Cursor fork)
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: ~/Library/Application Support/Code/User/globalStorage/anthropic.claude-code/
       Description: Extension global storage including session state and cached credentials (macOS)
       OS: macOS
       Type: Config
+      Phase: Activation
     - Path: ~/Library/Application Support/Code/User/settings.json
       Description: VS Code user settings — may contain claude.apiKey or extension configuration
       OS: macOS
       Type: Config
+      Phase: Activation
     - Path: C:\Users\*\AppData\Roaming\Code\User\globalStorage\anthropic.claude-code\
       Description: Extension global storage including session state and cached credentials (Windows)
       OS: Windows
       Type: Config
+      Phase: Activation
     - Path: C:\Users\*\AppData\Roaming\Code\User\settings.json
       Description: VS Code user settings — may contain API key or extension config (Windows)
       OS: Windows
       Type: Config
+      Phase: Activation
     - Path: C:\Users\*\.vscode\extensions\anthropic.claude-code-*\
       Description: Claude Code extension directory (Windows)
       OS: Windows
       Type: Cache
+      Phase: Install
     - Path: ~/.config/Code/User/globalStorage/anthropic.claude-code/
       Description: Extension global storage (Linux — XDG path)
       OS: Linux
       Type: Config
+      Phase: Activation
     - Path: ~/.config/Code/User/settings.json
       Description: VS Code user settings (Linux — XDG path)
       OS: Linux
       Type: Config
+      Phase: Activation
     - Path: <workspace>/.claude/settings.local.json
       Description: >
         Per-workspace Claude Code settings — present in any repo where the
@@ -77,6 +87,7 @@ Artifacts:
         per project and may indicate targeted use on sensitive repositories.
       OS: Any
       Type: Config
+      Phase: Activation
 
   ModelStorage: []
 
@@ -88,17 +99,22 @@ Artifacts:
         created — all extension logic runs within VS Code's Node.js runtime.
         Network connections to api.anthropic.com originating from 'code' or
         'code-helper' are the primary process-level indicator.
+      Phase: Use
       CLI:
         - Pattern: 'code\s+--type=extensionHost'
           Description: VS Code extension host process hosting the Claude Code extension
+          Phase: Use
         - Pattern: 'code-helper\s+--type=extensionHost'
           Description: VS Code extension host on macOS (code-helper variant)
+          Phase: Use
       ParentProcess: code
     - Name: cursor
       Description: Cursor (VS Code fork) extension host — same pattern as VS Code
+      Phase: Use
       CLI:
         - Pattern: 'cursor\s+--type=extensionHost'
           Description: Cursor extension host process
+          Phase: Use
       ParentProcess: cursor
 
   Network:
@@ -109,6 +125,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.anthropic.com
+      Phase: Use
     - Description: Statsig telemetry and feature flag evaluation
       Protocol: TCP
       Ports:
@@ -117,6 +134,7 @@ Artifacts:
       Domains:
         - statsig.anthropic.com
         - featuregates.org
+      Phase: Use
     - Description: VS Code Marketplace — extension auto-updates
       Protocol: TCP
       Ports:
@@ -125,41 +143,50 @@ Artifacts:
       Domains:
         - marketplace.visualstudio.com
         - '*.gallerycdn.vsassets.io'
+      Phase: Install
 
   Persistence:
     - OS: Windows
       Type: Registry
       Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Code
       Description: VS Code auto-start — Claude Code extension active whenever VS Code launches
+      Phase: Activation
     - OS: macOS
       Type: LaunchAgent
       Path: ~/Library/LaunchAgents/com.microsoft.VSCode.plist
       Description: VS Code LaunchAgent — extension loaded at every VS Code startup
+      Phase: Activation
     - OS: Linux
       Type: Cron
       Path: ~/.config/autostart/code.desktop
       Description: VS Code XDG autostart entry — extension active on every VS Code launch
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for Code.exe (extensionHost type) making API calls
+      Phase: Use
     - EventID: 5156
       ProviderName: Microsoft-Windows-Security-Auditing
       LogFile: Security.evtx
       Description: Network connection from Code.exe to api.anthropic.com:443
+      Phase: Use
 
   Registry:
     - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\{VS Code extension registry}
       Description: VS Code extension registration — may list installed extensions including Claude Code
+      Phase: Install
 
 Detections:
   Sigma:
     - Path: detections/sigma/claude_vscode_network.yml
       Description: Detects VS Code or Cursor process making connections to api.anthropic.com
+      Phase: Use
     - Path: detections/sigma/claude_vscode_extension_install.yml
       Description: Detects creation of anthropic.claude-code extension directory
+      Phase: Install
 
 References:
   - https://marketplace.visualstudio.com/items?itemName=Anthropic.claude-code

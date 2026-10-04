@@ -35,31 +35,38 @@ Artifacts:
       Description: Linux one-click start script bundled with the installer
       OS: Linux
       Type: Binary
+      Phase: Install
     - Path: '*/text-generation-webui/start_windows.bat'
       Description: Windows one-click start batch script
       OS: Windows
       Type: Binary
+      Phase: Install
     - Path: '*/text-generation-webui/server.py'
       Description: Main Python application entry point
       OS: Any
       Type: Binary
+      Phase: Install
     - Path: '*/text-generation-webui/models/'
       Description: Default model storage directory (relative to install path)
       OS: Any
       Type: Cache
+      Phase: Install
     - Path: '*/text-generation-webui/characters/'
       Description: Character/persona definition files — may reveal intended use
       OS: Any
       Type: Config
+      Phase: Activation
     - Path: '*/text-generation-webui/logs/'
       Description: Chat and API request logs
       OS: Any
       Type: Log
+      Phase: Use
 
   ModelStorage:
     - Path: '*/text-generation-webui/models/**/*.gguf'
       Description: GGUF models loaded via llama.cpp backend
       OS: Any
+      Phase: Install
       MagicBytes:
         - Format: GGUF
           Hex: '47 47 55 46'
@@ -68,13 +75,17 @@ Artifacts:
   Process:
     - Name: python
       Description: Python process running server.py — the main web UI and API server
+      Phase: Use
       CLI:
         - Pattern: 'python.*server\.py'
           Description: Main server process
+          Phase: Use
         - Pattern: 'python.*server\.py.*--api'
           Description: Server started with API mode enabled
+          Phase: Activation
         - Pattern: 'python.*server\.py.*--listen'
           Description: Server exposed beyond localhost (--listen flag)
+          Phase: Abuse
       ParentProcess: bash
 
   Network:
@@ -84,24 +95,28 @@ Artifacts:
         - 7860
       BindAddress: '127.0.0.1'
       Domains: []
+      Phase: Use
     - Description: OpenAI-compatible REST API (enabled with --api flag)
       Protocol: TCP
       Ports:
         - 5000
       BindAddress: '127.0.0.1'
       Domains: []
+      Phase: Use
 
   Persistence:
     - OS: Linux
       Type: Service
       Path: /etc/systemd/system/text-generation-webui.service
       Description: User-created systemd unit for persistent background operation
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Process creation for python.exe running server.py
+      Phase: Use
 
   Registry: []
 
@@ -109,11 +124,14 @@ Detections:
   Sigma:
     - Path: detections/sigma/tgwebui_process.yml
       Description: Detects Python process running text-generation-webui server.py
+      Phase: Use
     - Path: detections/sigma/tgwebui_listen_flag.yml
       Description: Detects --listen flag exposing the web UI beyond localhost
+      Phase: Abuse
   YARA:
     - Path: detections/yara/gguf_magic_bytes.yar
       Description: Matches GGUF models in the models/ directory
+      Phase: Install
 
 References:
   - https://github.com/oobabooga/text-generation-webui

@@ -33,10 +33,12 @@ Artifacts:
       Description: Continue.dev VS Code extension directory (Linux/macOS)
       OS: Linux
       Type: Cache
+      Phase: Install
     - Path: C:\Users\*\.vscode\extensions\continue.continue-*\
       Description: Continue.dev VS Code extension directory (Windows)
       OS: Windows
       Type: Cache
+      Phase: Install
     - Path: ~/.continue/config.json
       Description: >
         Continue.dev configuration file — contains model selection, API keys,
@@ -44,23 +46,28 @@ Artifacts:
         are configured and may contain plaintext API keys.
       OS: Any
       Type: Config
+      Phase: Activation
     - Path: ~/.continue/config.ts
       Description: Continue.dev TypeScript configuration (alternative to JSON)
       OS: Any
       Type: Config
+      Phase: Activation
     - Path: ~/.continue/logs/
       Description: Continue.dev session logs — may contain code snippets sent to LLM
       OS: Any
       Type: Log
+      Phase: Use
 
   ModelStorage: []
 
   Process:
     - Name: code
       Description: VS Code extension host — Continue.dev runs within the VS Code extension host
+      Phase: Use
       CLI:
         - Pattern: 'code\s+--type=extensionHost'
           Description: VS Code extension host where Continue.dev runs
+          Phase: Use
       ParentProcess: code
 
   Network:
@@ -71,6 +78,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.openai.com
+      Phase: Use
     - Description: Anthropic API (if configured as provider)
       Protocol: TCP
       Ports:
@@ -78,6 +86,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.anthropic.com
+      Phase: Use
     - Description: Continue.dev hub and telemetry
       Protocol: TCP
       Ports:
@@ -85,6 +94,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - continue.dev
+      Phase: Use
 
   Persistence: []
 
@@ -93,6 +103,7 @@ Artifacts:
       ProviderName: Microsoft-Windows-Security-Auditing
       LogFile: Security.evtx
       Description: Network connection from Code.exe to configured LLM provider endpoint
+      Phase: Use
 
   Registry: []
 
@@ -100,8 +111,10 @@ Detections:
   Sigma:
     - Path: detections/sigma/continue_dev_extension.yml
       Description: Detects creation of continue.continue extension directory in VS Code
+      Phase: Install
     - Path: detections/sigma/continue_dev_config.yml
       Description: Detects access to ~/.continue/config.json which may contain API keys
+      Phase: Activation
 
 References:
   - https://continue.dev

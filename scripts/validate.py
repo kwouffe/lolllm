@@ -26,28 +26,35 @@ class MagicByte(BaseModel):
         return v
 
 
+PhaseType = Optional[Literal["Install", "Activation", "Use", "Abuse"]]
+
+
 class DiskArtifact(BaseModel):
     Path: str
     Description: str
     OS: Literal["Windows", "Linux", "macOS", "Any"]
     Type: Literal["Binary", "Config", "Log", "Cache"]
+    Phase: PhaseType = None
 
 
 class ModelStorageArtifact(BaseModel):
     Path: str
     Description: str
     OS: Literal["Windows", "Linux", "macOS", "Any"]
+    Phase: PhaseType = None
     MagicBytes: list[MagicByte] = []
 
 
 class CLIPattern(BaseModel):
     Pattern: str
     Description: str
+    Phase: PhaseType = None
 
 
 class ProcessArtifact(BaseModel):
     Name: str
     Description: str
+    Phase: PhaseType = None
     CLI: list[CLIPattern] = []
     ParentProcess: Optional[str] = None
 
@@ -58,6 +65,7 @@ class NetworkArtifact(BaseModel):
     Ports: list[int] = []
     BindAddress: str = ""
     Domains: list[str] = []
+    Phase: PhaseType = None
 
 
 class PersistenceArtifact(BaseModel):
@@ -65,6 +73,7 @@ class PersistenceArtifact(BaseModel):
     Type: Literal["Service", "Registry", "Cron", "LaunchAgent", "LaunchDaemon"]
     Path: str
     Description: str
+    Phase: PhaseType = None
 
 
 class EventLogArtifact(BaseModel):
@@ -72,11 +81,13 @@ class EventLogArtifact(BaseModel):
     ProviderName: str
     LogFile: str
     Description: str
+    Phase: PhaseType = None
 
 
 class RegistryArtifact(BaseModel):
     Path: str
     Description: str
+    Phase: PhaseType = None
 
 
 class Artifacts(BaseModel):
@@ -92,6 +103,7 @@ class Artifacts(BaseModel):
 class DetectionRef(BaseModel):
     Path: str
     Description: str
+    Phase: PhaseType = None
 
 
 class Detections(BaseModel):

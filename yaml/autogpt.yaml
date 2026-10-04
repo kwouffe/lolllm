@@ -36,35 +36,44 @@ Artifacts:
         or modified by the agent across sessions. Contains outputs of autonomous actions.
       OS: Any
       Type: Log
+      Phase: Use
     - Path: ./.env
       Description: AutoGPT environment configuration — contains OPENAI_API_KEY and optionally other credentials
       OS: Any
       Type: Config
+      Phase: Activation
     - Path: ./ai_settings.yaml
       Description: AutoGPT agent configuration — defines agent name, role, and goals
       OS: Any
       Type: Config
+      Phase: Activation
     - Path: ~/.config/AutoGPT/
       Description: AutoGPT global configuration directory (newer versions)
       OS: Linux
       Type: Config
+      Phase: Activation
     - Path: ./memory/
       Description: AutoGPT persistent memory files (JSON or vector database)
       OS: Any
       Type: Log
+      Phase: Use
 
   ModelStorage: []
 
   Process:
     - Name: python
       Description: AutoGPT Python agent process — may run for extended periods performing autonomous tasks
+      Phase: Use
       CLI:
         - Pattern: 'python.*autogpt'
           Description: AutoGPT agent running
+          Phase: Use
         - Pattern: 'python.*run\s+serve'
           Description: AutoGPT API server mode (newer versions)
+          Phase: Activation
         - Pattern: 'autogpt\s+'
           Description: AutoGPT CLI direct invocation
+          Phase: Use
       ParentProcess: bash
 
   Network:
@@ -75,6 +84,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.openai.com
+      Phase: Use
     - Description: Arbitrary internet access via browsing capability
       Protocol: TCP
       Ports:
@@ -83,6 +93,7 @@ Artifacts:
       BindAddress: ''
       Domains:
         - '*'
+      Phase: Abuse
     - Description: AutoGPT Platform API (hosted version)
       Protocol: TCP
       Ports:
@@ -90,18 +101,21 @@ Artifacts:
       BindAddress: ''
       Domains:
         - api.agpt.co
+      Phase: Use
 
   Persistence:
     - OS: Linux
       Type: Cron
       Path: /etc/cron.d/autogpt
       Description: Cron job running AutoGPT for scheduled autonomous task execution
+      Phase: Activation
 
   EventLog:
     - EventID: 4688
       ProviderName: Microsoft-Security-Auditing
       LogFile: Security.evtx
       Description: Python.exe process running AutoGPT — may spawn child processes for tool use
+      Phase: Use
 
   Registry: []
 
@@ -109,10 +123,13 @@ Detections:
   Sigma:
     - Path: detections/sigma/autogpt_process.yml
       Description: Detects Python running AutoGPT agent
+      Phase: Use
     - Path: detections/sigma/autogpt_workspace.yml
       Description: Detects creation of auto_gpt_workspace directory indicating AutoGPT installation
+      Phase: Install
     - Path: detections/sigma/autogpt_network.yml
       Description: Detects AutoGPT making broad outbound internet connections via its browsing capability
+      Phase: Abuse
 
 References:
   - https://news.agpt.co
