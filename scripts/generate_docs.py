@@ -36,10 +36,10 @@ TEMPLATE = """\
 
 ## Disk Artifacts
 
-| Path | OS | Type | Description |
-|------|----|------|-------------|
+| Path | OS | Type | Phase | Description |
+|------|----|------|-------|-------------|
 {% for a in tool.Artifacts.Disk -%}
-| `{{ a.Path }}` | {{ a.OS }} | {{ a.Type }} | {{ a.Description }} |
+| `{{ a.Path }}` | {{ a.OS }} | {{ a.Type }} | {{ a.Phase if a.Phase is defined and a.Phase else "—" }} | {{ a.Description }} |
 {% endfor %}
 {% endif %}
 {% if tool.Artifacts.ModelStorage %}
@@ -47,7 +47,7 @@ TEMPLATE = """\
 ## Model Storage
 
 {% for ms in tool.Artifacts.ModelStorage %}
-**`{{ ms.Path }}`** ({{ ms.OS }}) — {{ ms.Description }}
+**`{{ ms.Path }}`** ({{ ms.OS }}) — {{ ms.Description }}{% if ms.Phase is defined and ms.Phase %} *({{ ms.Phase }})*{% endif %}
 
 {% if ms.MagicBytes %}
 | Format | Magic Bytes (hex) | Offset |
@@ -63,7 +63,7 @@ TEMPLATE = """\
 ## Process Artifacts
 
 {% for p in tool.Artifacts.Process %}
-### `{{ p.Name }}`
+### `{{ p.Name }}`{% if p.Phase is defined and p.Phase %} <small>*({{ p.Phase }})*</small>{% endif %}
 
 {{ p.Description }}
 {% if p.ParentProcess %}
@@ -71,10 +71,10 @@ TEMPLATE = """\
 {% endif %}
 {% if p.CLI %}
 
-| CLI Pattern | Description |
-|-------------|-------------|
+| CLI Pattern | Phase | Description |
+|-------------|-------|-------------|
 {% for c in p.CLI -%}
-| `{{ c.Pattern }}` | {{ c.Description }} |
+| `{{ c.Pattern }}` | {{ c.Phase if c.Phase is defined and c.Phase else "—" }} | {{ c.Description }} |
 {% endfor %}
 {% endif %}
 {% endfor %}
@@ -83,40 +83,40 @@ TEMPLATE = """\
 
 ## Network Artifacts
 
-| Description | Protocol | Ports | Bind Address | Domains |
-|-------------|----------|-------|--------------|---------|
+| Description | Protocol | Ports | Bind Address | Domains | Phase |
+|-------------|----------|-------|--------------|---------|-------|
 {% for n in tool.Artifacts.Network -%}
-| {{ n.Description }} | {{ n.Protocol }} | {{ n.Ports | join(", ") if n.Ports else "—" }} | `{{ n.BindAddress if n.BindAddress else "—" }}` | {{ n.Domains | join(", ") if n.Domains else "—" }} |
+| {{ n.Description }} | {{ n.Protocol }} | {{ n.Ports | join(", ") if n.Ports else "—" }} | `{{ n.BindAddress if n.BindAddress else "—" }}` | {{ n.Domains | join(", ") if n.Domains else "—" }} | {{ n.Phase if n.Phase is defined and n.Phase else "—" }} |
 {% endfor %}
 {% endif %}
 {% if tool.Artifacts.Persistence %}
 
 ## Persistence Mechanisms
 
-| OS | Type | Path | Description |
-|----|------|------|-------------|
+| OS | Type | Path | Phase | Description |
+|----|------|------|-------|-------------|
 {% for p in tool.Artifacts.Persistence -%}
-| {{ p.OS }} | {{ p.Type }} | `{{ p.Path }}` | {{ p.Description }} |
+| {{ p.OS }} | {{ p.Type }} | `{{ p.Path }}` | {{ p.Phase if p.Phase is defined and p.Phase else "—" }} | {{ p.Description }} |
 {% endfor %}
 {% endif %}
 {% if tool.Artifacts.EventLog %}
 
 ## Windows Event Log
 
-| Event ID | Provider | Log File | Description |
-|----------|----------|----------|-------------|
+| Event ID | Provider | Log File | Phase | Description |
+|----------|----------|----------|-------|-------------|
 {% for e in tool.Artifacts.EventLog -%}
-| {{ e.EventID }} | {{ e.ProviderName }} | {{ e.LogFile }} | {{ e.Description }} |
+| {{ e.EventID }} | {{ e.ProviderName }} | {{ e.LogFile }} | {{ e.Phase if e.Phase is defined and e.Phase else "—" }} | {{ e.Description }} |
 {% endfor %}
 {% endif %}
 {% if tool.Artifacts.Registry %}
 
 ## Registry Artifacts
 
-| Path | Description |
-|------|-------------|
+| Path | Phase | Description |
+|------|-------|-------------|
 {% for r in tool.Artifacts.Registry -%}
-| `{{ r.Path }}` | {{ r.Description }} |
+| `{{ r.Path }}` | {{ r.Phase if r.Phase is defined and r.Phase else "—" }} | {{ r.Description }} |
 {% endfor %}
 {% endif %}
 {% if tool.Detections.Sigma or tool.Detections.YARA %}
@@ -126,13 +126,13 @@ TEMPLATE = """\
 {% if tool.Detections.Sigma %}
 ### Sigma
 {% for s in tool.Detections.Sigma %}
-- `{{ s.Path }}` — {{ s.Description }}
+- `{{ s.Path }}` *({{ s.Phase if s.Phase is defined and s.Phase else "—" }})* — {{ s.Description }}
 {% endfor %}
 {% endif %}
 {% if tool.Detections.YARA %}
 ### YARA
 {% for y in tool.Detections.YARA %}
-- `{{ y.Path }}` — {{ y.Description }}
+- `{{ y.Path }}` *({{ y.Phase if y.Phase is defined and y.Phase else "—" }})* — {{ y.Description }}
 {% endfor %}
 {% endif %}
 {% endif %}
