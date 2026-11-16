@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Literal, Optional
 
 import yaml
-from pydantic import BaseModel, ValidationError, field_validator
+from pydantic import BaseModel, ValidationError, field_validator, Field, NonNegativeInt
 
 YAML_DIR = Path(__file__).parent.parent / "yaml"
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 class MagicByte(BaseModel):
@@ -29,12 +30,24 @@ class MagicByte(BaseModel):
 PhaseType = Optional[Literal["Install", "Activation", "Use", "Abuse"]]
 
 
+TrustName = Literal["ai-generated", "ai-cross-checked", "source-cited", "lab-observed", "human-verified"]
+TrustType = Optional[TrustName]
+
+
+class EvidenceRef(BaseModel):
+    Type: Literal["url", "source", "lab", "checker", "human"]
+    Ref: str
+    Excerpt: str = Field(max_length=200)
+
+
 class DiskArtifact(BaseModel):
     Path: str
     Description: str
     OS: Literal["Windows", "Linux", "macOS", "Any"]
     Type: Literal["Binary", "Config", "Log", "Cache"]
     Phase: PhaseType = None
+    Trust: TrustType = None
+    Evidence: list[EvidenceRef] = []
 
 
 class ModelStorageArtifact(BaseModel):
@@ -42,6 +55,8 @@ class ModelStorageArtifact(BaseModel):
     Description: str
     OS: Literal["Windows", "Linux", "macOS", "Any"]
     Phase: PhaseType = None
+    Trust: TrustType = None
+    Evidence: list[EvidenceRef] = []
     MagicBytes: list[MagicByte] = []
 
 
@@ -49,12 +64,16 @@ class CLIPattern(BaseModel):
     Pattern: str
     Description: str
     Phase: PhaseType = None
+    Trust: TrustType = None
+    Evidence: list[EvidenceRef] = []
 
 
 class ProcessArtifact(BaseModel):
     Name: str
     Description: str
     Phase: PhaseType = None
+    Trust: TrustType = None
+    Evidence: list[EvidenceRef] = []
     CLI: list[CLIPattern] = []
     ParentProcess: Optional[str] = None
 
@@ -66,14 +85,18 @@ class NetworkArtifact(BaseModel):
     BindAddress: str = ""
     Domains: list[str] = []
     Phase: PhaseType = None
+    Trust: TrustType = None
+    Evidence: list[EvidenceRef] = []
 
 
 class PersistenceArtifact(BaseModel):
     OS: Literal["Windows", "Linux", "macOS"]
-    Type: Literal["Service", "Registry", "Cron", "LaunchAgent", "LaunchDaemon"]
+    Type: Literal["Service", "Registry", "Cron", "LaunchAgent", "LaunchDaemon", "ShellRC", "XDGAutostart"]
     Path: str
     Description: str
     Phase: PhaseType = None
+    Trust: TrustType = None
+    Evidence: list[EvidenceRef] = []
 
 
 class EventLogArtifact(BaseModel):
@@ -82,12 +105,16 @@ class EventLogArtifact(BaseModel):
     LogFile: str
     Description: str
     Phase: PhaseType = None
+    Trust: TrustType = None
+    Evidence: list[EvidenceRef] = []
 
 
 class RegistryArtifact(BaseModel):
     Path: str
     Description: str
     Phase: PhaseType = None
+    Trust: TrustType = None
+    Evidence: list[EvidenceRef] = []
 
 
 class Artifacts(BaseModel):
@@ -104,6 +131,18 @@ class DetectionRef(BaseModel):
     Path: str
     Description: str
     Phase: PhaseType = None
+    Trust: TrustType = None
+    Evidence: list[EvidenceRef] = []
+
+    @field_validator("Path")
+    @classmethod
+    def path_exists(cls, v: str) -> str:
+        target = (REPO_ROOT / v).resolve()
+        if Path(v).is_absolute() or not target.is_relative_to(REPO_ROOT):
+            raise ValueError(f"detection path escapes the repository: {v!r}")
+        if not target.is_file():
+            raise ValueError(f"detection file does not exist: {v}")
+        return v
 
 
 class Detections(BaseModel):
@@ -127,6 +166,12 @@ class Acknowledgement(BaseModel):
     Handle: Optional[str] = None
 
 
+class EntryTrustSummary(BaseModel):
+    Min: TrustName
+    Counts: dict[TrustName, NonNegativeInt]
+    Excluded: NonNegativeInt
+
+
 class LolLLMEntry(BaseModel):
     Name: str
     Category: Literal["InferenceEngine", "CloudAPIClient", "FineTuningTool", "EmbeddingEngine"]
@@ -135,6 +180,7 @@ class LolLLMEntry(BaseModel):
     Created: date
     LastModified: date
     ReviewStatus: Literal["unreviewed", "in-review", "reviewed"]
+    TrustSummary: Optional[EntryTrustSummary] = None
     Details: Details
     Artifacts: Artifacts
     Detections: Detections
