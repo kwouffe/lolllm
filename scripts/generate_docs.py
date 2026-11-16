@@ -16,7 +16,8 @@ TEMPLATE = """\
     **Category:** `{{ tool.Category }}` &nbsp;|&nbsp;
     **OS:** {{ tool.Details.SupportedOS | join(", ") }} &nbsp;|&nbsp;
     **Privileges:** `{{ tool.Details.Privileges }}` &nbsp;|&nbsp;
-    **Free:** {{ "Yes" if tool.Details.Free else "No" }}
+    **Free:** {{ "Yes" if tool.Details.Free else "No" }}{% if tool.TrustSummary is defined and tool.TrustSummary %} &nbsp;|&nbsp;
+    **Trust (lowest):** `{{ tool.TrustSummary.Min }}`{% endif %}
 
 {{ tool.Description }}
 
@@ -36,10 +37,10 @@ TEMPLATE = """\
 
 ## Disk Artifacts
 
-| Path | OS | Type | Phase | Description |
-|------|----|------|-------|-------------|
+| Path | OS | Type | Phase | Trust | Description |
+|------|----|------|-------|-------|-------------|
 {% for a in tool.Artifacts.Disk -%}
-| `{{ a.Path }}` | {{ a.OS }} | {{ a.Type }} | {{ a.Phase if a.Phase is defined and a.Phase else "—" }} | {{ a.Description }} |
+| `{{ a.Path }}` | {{ a.OS }} | {{ a.Type }} | {{ a.Phase if a.Phase is defined and a.Phase else "—" }} | {{ a.Trust if a.Trust is defined and a.Trust else "—" }} | {{ a.Description }} |
 {% endfor %}
 {% endif %}
 {% if tool.Artifacts.ModelStorage %}
@@ -47,7 +48,7 @@ TEMPLATE = """\
 ## Model Storage
 
 {% for ms in tool.Artifacts.ModelStorage %}
-**`{{ ms.Path }}`** ({{ ms.OS }}) — {{ ms.Description }}{% if ms.Phase is defined and ms.Phase %} *({{ ms.Phase }})*{% endif %}
+**`{{ ms.Path }}`** ({{ ms.OS }}) — {{ ms.Description }}{% if ms.Phase is defined and ms.Phase %} *({{ ms.Phase }})*{% endif %}{% if ms.Trust is defined and ms.Trust %} *(trust: {{ ms.Trust }})*{% endif %}
 
 {% if ms.MagicBytes %}
 | Format | Magic Bytes (hex) | Offset |
@@ -63,7 +64,7 @@ TEMPLATE = """\
 ## Process Artifacts
 
 {% for p in tool.Artifacts.Process %}
-### `{{ p.Name }}`{% if p.Phase is defined and p.Phase %} <small>*({{ p.Phase }})*</small>{% endif %}
+### `{{ p.Name }}`{% if p.Phase is defined and p.Phase %} <small>*({{ p.Phase }})*</small>{% endif %}{% if p.Trust is defined and p.Trust %} <small>*(trust: {{ p.Trust }})*</small>{% endif %}
 
 {{ p.Description }}
 {% if p.ParentProcess %}
@@ -71,10 +72,10 @@ TEMPLATE = """\
 {% endif %}
 {% if p.CLI %}
 
-| CLI Pattern | Phase | Description |
-|-------------|-------|-------------|
+| CLI Pattern | Phase | Trust | Description |
+|-------------|-------|-------|-------------|
 {% for c in p.CLI -%}
-| `{{ c.Pattern }}` | {{ c.Phase if c.Phase is defined and c.Phase else "—" }} | {{ c.Description }} |
+| `{{ c.Pattern }}` | {{ c.Phase if c.Phase is defined and c.Phase else "—" }} | {{ c.Trust if c.Trust is defined and c.Trust else "—" }} | {{ c.Description }} |
 {% endfor %}
 {% endif %}
 {% endfor %}
@@ -83,40 +84,40 @@ TEMPLATE = """\
 
 ## Network Artifacts
 
-| Description | Protocol | Ports | Bind Address | Domains | Phase |
-|-------------|----------|-------|--------------|---------|-------|
+| Description | Protocol | Ports | Bind Address | Domains | Phase | Trust |
+|-------------|----------|-------|--------------|---------|-------|-------|
 {% for n in tool.Artifacts.Network -%}
-| {{ n.Description }} | {{ n.Protocol }} | {{ n.Ports | join(", ") if n.Ports else "—" }} | `{{ n.BindAddress if n.BindAddress else "—" }}` | {{ n.Domains | join(", ") if n.Domains else "—" }} | {{ n.Phase if n.Phase is defined and n.Phase else "—" }} |
+| {{ n.Description }} | {{ n.Protocol }} | {{ n.Ports | join(", ") if n.Ports else "—" }} | `{{ n.BindAddress if n.BindAddress else "—" }}` | {{ n.Domains | join(", ") if n.Domains else "—" }} | {{ n.Phase if n.Phase is defined and n.Phase else "—" }} | {{ n.Trust if n.Trust is defined and n.Trust else "—" }} |
 {% endfor %}
 {% endif %}
 {% if tool.Artifacts.Persistence %}
 
 ## Persistence Mechanisms
 
-| OS | Type | Path | Phase | Description |
-|----|------|------|-------|-------------|
+| OS | Type | Path | Phase | Trust | Description |
+|----|------|------|-------|-------|-------------|
 {% for p in tool.Artifacts.Persistence -%}
-| {{ p.OS }} | {{ p.Type }} | `{{ p.Path }}` | {{ p.Phase if p.Phase is defined and p.Phase else "—" }} | {{ p.Description }} |
+| {{ p.OS }} | {{ p.Type }} | `{{ p.Path }}` | {{ p.Phase if p.Phase is defined and p.Phase else "—" }} | {{ p.Trust if p.Trust is defined and p.Trust else "—" }} | {{ p.Description }} |
 {% endfor %}
 {% endif %}
 {% if tool.Artifacts.EventLog %}
 
 ## Windows Event Log
 
-| Event ID | Provider | Log File | Phase | Description |
-|----------|----------|----------|-------|-------------|
+| Event ID | Provider | Log File | Phase | Trust | Description |
+|----------|----------|----------|-------|-------|-------------|
 {% for e in tool.Artifacts.EventLog -%}
-| {{ e.EventID }} | {{ e.ProviderName }} | {{ e.LogFile }} | {{ e.Phase if e.Phase is defined and e.Phase else "—" }} | {{ e.Description }} |
+| {{ e.EventID }} | {{ e.ProviderName }} | {{ e.LogFile }} | {{ e.Phase if e.Phase is defined and e.Phase else "—" }} | {{ e.Trust if e.Trust is defined and e.Trust else "—" }} | {{ e.Description }} |
 {% endfor %}
 {% endif %}
 {% if tool.Artifacts.Registry %}
 
 ## Registry Artifacts
 
-| Path | Phase | Description |
-|------|-------|-------------|
+| Path | Phase | Trust | Description |
+|------|-------|-------|-------------|
 {% for r in tool.Artifacts.Registry -%}
-| `{{ r.Path }}` | {{ r.Phase if r.Phase is defined and r.Phase else "—" }} | {{ r.Description }} |
+| `{{ r.Path }}` | {{ r.Phase if r.Phase is defined and r.Phase else "—" }} | {{ r.Trust if r.Trust is defined and r.Trust else "—" }} | {{ r.Description }} |
 {% endfor %}
 {% endif %}
 {% if tool.Detections.Sigma or tool.Detections.YARA %}
@@ -126,13 +127,13 @@ TEMPLATE = """\
 {% if tool.Detections.Sigma %}
 ### Sigma
 {% for s in tool.Detections.Sigma %}
-- `{{ s.Path }}` *({{ s.Phase if s.Phase is defined and s.Phase else "—" }})* — {{ s.Description }}
+- `{{ s.Path }}` *({{ s.Phase if s.Phase is defined and s.Phase else "—" }}; trust: {{ s.Trust if s.Trust is defined and s.Trust else "—" }})* — {{ s.Description }}
 {% endfor %}
 {% endif %}
 {% if tool.Detections.YARA %}
 ### YARA
 {% for y in tool.Detections.YARA %}
-- `{{ y.Path }}` *({{ y.Phase if y.Phase is defined and y.Phase else "—" }})* — {{ y.Description }}
+- `{{ y.Path }}` *({{ y.Phase if y.Phase is defined and y.Phase else "—" }}; trust: {{ y.Trust if y.Trust is defined and y.Trust else "—" }})* — {{ y.Description }}
 {% endfor %}
 {% endif %}
 {% endif %}

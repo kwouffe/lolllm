@@ -11,6 +11,21 @@
       "type": "string",
       "enum": ["Install", "Activation", "Use", "Abuse"],
       "description": "Detection phase: Install=tool arrives on disk, Activation=tool configured/enabled, Use=tool actively invoked, Abuse=anomalous/suspicious use"
+    },
+    "trust": {
+      "type": "string",
+      "enum": ["ai-generated", "ai-cross-checked", "source-cited", "lab-observed", "human-verified"],
+      "description": "Trust level of an artifact or detection row: ai-generated=drafted by an LLM, unchecked; ai-cross-checked=an independent skeptic agent failed to refute it and it passes deterministic checks; source-cited=backed by official docs, source code or packaging (exact URL + excerpt); lab-observed=seen directly in a sandbox run; human-verified=confirmed by a maintainer"
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["Type", "Ref", "Excerpt"],
+      "additionalProperties": false,
+      "properties": {
+        "Type": { "type": "string", "enum": ["url", "source", "lab", "checker", "human"] },
+        "Ref": { "type": "string" },
+        "Excerpt": { "type": "string", "maxLength": 200 }
+      }
     }
   },
   "properties": {
@@ -24,6 +39,21 @@
       "type": "string",
       "enum": ["unreviewed", "in-review", "reviewed"],
       "description": "Manual review status. Set to 'reviewed' only after a human has verified all artifacts."
+    },
+    "TrustSummary": {
+      "type": "object",
+      "required": ["Min", "Counts", "Excluded"],
+      "additionalProperties": false,
+      "description": "Computed: the lowest trust level among the counted rows, the number of rows per level, and the number of rows excluded (refuted or not actionable).",
+      "properties": {
+        "Min": { "$ref": "#/$defs/trust" },
+        "Counts": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/trust" },
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "Excluded": { "type": "integer", "minimum": 0 }
+      }
     },
     "Author": { "type": "string" },
     "Created": { "type": "string", "format": "date" },
@@ -66,7 +96,9 @@
               "Description": { "type": "string" },
               "OS": { "type": "string", "enum": ["Windows", "Linux", "macOS", "Any"] },
               "Type": { "type": "string", "enum": ["Binary", "Config", "Log", "Cache"] },
-              "Phase": { "$ref": "#/$defs/phase" }
+              "Phase": { "$ref": "#/$defs/phase" },
+              "Trust": { "$ref": "#/$defs/trust" },
+              "Evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
             }
           }
         },
@@ -81,6 +113,8 @@
               "Description": { "type": "string" },
               "OS": { "type": "string", "enum": ["Windows", "Linux", "macOS", "Any"] },
               "Phase": { "$ref": "#/$defs/phase" },
+              "Trust": { "$ref": "#/$defs/trust" },
+              "Evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
               "MagicBytes": {
                 "type": "array",
                 "items": {
@@ -107,6 +141,8 @@
               "Name": { "type": "string" },
               "Description": { "type": "string" },
               "Phase": { "$ref": "#/$defs/phase" },
+              "Trust": { "$ref": "#/$defs/trust" },
+              "Evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
               "CLI": {
                 "type": "array",
                 "items": {
@@ -116,7 +152,9 @@
                   "properties": {
                     "Pattern": { "type": "string" },
                     "Description": { "type": "string" },
-                    "Phase": { "$ref": "#/$defs/phase" }
+                    "Phase": { "$ref": "#/$defs/phase" },
+                    "Trust": { "$ref": "#/$defs/trust" },
+                    "Evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
                   }
                 }
               },
@@ -136,7 +174,9 @@
               "Ports": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 65535 } },
               "BindAddress": { "type": "string" },
               "Domains": { "type": "array", "items": { "type": "string" } },
-              "Phase": { "$ref": "#/$defs/phase" }
+              "Phase": { "$ref": "#/$defs/phase" },
+              "Trust": { "$ref": "#/$defs/trust" },
+              "Evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
             }
           }
         },
@@ -148,10 +188,12 @@
             "additionalProperties": false,
             "properties": {
               "OS": { "type": "string", "enum": ["Windows", "Linux", "macOS"] },
-              "Type": { "type": "string", "enum": ["Service", "Registry", "Cron", "LaunchAgent", "LaunchDaemon"] },
+              "Type": { "type": "string", "enum": ["Service", "Registry", "Cron", "LaunchAgent", "LaunchDaemon", "ShellRC", "XDGAutostart"] },
               "Path": { "type": "string" },
               "Description": { "type": "string" },
-              "Phase": { "$ref": "#/$defs/phase" }
+              "Phase": { "$ref": "#/$defs/phase" },
+              "Trust": { "$ref": "#/$defs/trust" },
+              "Evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
             }
           }
         },
@@ -166,7 +208,9 @@
               "ProviderName": { "type": "string" },
               "LogFile": { "type": "string" },
               "Description": { "type": "string" },
-              "Phase": { "$ref": "#/$defs/phase" }
+              "Phase": { "$ref": "#/$defs/phase" },
+              "Trust": { "$ref": "#/$defs/trust" },
+              "Evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
             }
           }
         },
@@ -179,7 +223,9 @@
             "properties": {
               "Path": { "type": "string" },
               "Description": { "type": "string" },
-              "Phase": { "$ref": "#/$defs/phase" }
+              "Phase": { "$ref": "#/$defs/phase" },
+              "Trust": { "$ref": "#/$defs/trust" },
+              "Evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
             }
           }
         }
@@ -198,7 +244,9 @@
             "properties": {
               "Path": { "type": "string", "pattern": "^detections/sigma/.*\\.yml$" },
               "Description": { "type": "string" },
-              "Phase": { "$ref": "#/$defs/phase" }
+              "Phase": { "$ref": "#/$defs/phase" },
+              "Trust": { "$ref": "#/$defs/trust" },
+              "Evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
             }
           }
         },
@@ -211,7 +259,9 @@
             "properties": {
               "Path": { "type": "string", "pattern": "^detections/yara/.*\\.yar$" },
               "Description": { "type": "string" },
-              "Phase": { "$ref": "#/$defs/phase" }
+              "Phase": { "$ref": "#/$defs/phase" },
+              "Trust": { "$ref": "#/$defs/trust" },
+              "Evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
             }
           }
         }
