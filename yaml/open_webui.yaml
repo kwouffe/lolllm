@@ -95,13 +95,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/open_webui_process.yml
-      Description: Detects uvicorn or Python process running Open WebUI
-      Phase: Use
-    - Path: detections/sigma/open_webui_port.yml
-      Description: Detects Open WebUI network listener on port 3000
-      Phase: Use
+  Sigma: []
 
 References:
   - https://openwebui.com

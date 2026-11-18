@@ -135,13 +135,7 @@ Artifacts:
       Phase: Activation
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/codeium_windsurf_network.yml
-      Description: Detects connections to server.codeium.com from any process
-      Phase: Use
-    - Path: detections/sigma/codeium_windsurf_process.yml
-      Description: Detects Windsurf.exe process creation
-      Phase: Use
+  Sigma: []
 
 References:
   - https://codeium.com

@@ -109,16 +109,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/open_interpreter_process.yml
-      Description: Detects interpreter process creation
-      Phase: Use
-    - Path: detections/sigma/open_interpreter_os_mode.yml
-      Description: Detects Open Interpreter --os flag granting LLM full OS control
-      Phase: Abuse
-    - Path: detections/sigma/open_interpreter_autoconfirm.yml
-      Description: Detects -y or --force-task-completion flags enabling unattended code execution
-      Phase: Abuse
+  Sigma: []
 
 References:
   - https://openinterpreter.com

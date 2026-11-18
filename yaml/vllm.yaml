@@ -107,13 +107,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/vllm_process.yml
-      Description: Detects Python process running the vLLM API server entrypoint
-      Phase: Use
-    - Path: detections/sigma/vllm_hf_download.yml
-      Description: Detects connections to Hugging Face during vLLM model download
-      Phase: Install
+  Sigma: []
 
 References:
   - https://docs.vllm.ai

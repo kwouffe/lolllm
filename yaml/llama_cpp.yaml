@@ -121,13 +121,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/llama_cpp_server_expose.yml
-      Description: Detects llama-server bound to 0.0.0.0 (exposed beyond localhost)
-      Phase: Abuse
-    - Path: detections/sigma/llama_cpp_process.yml
-      Description: Detects llama-cli or llama-server process creation
-      Phase: Use
+  Sigma: []
   YARA:
     - Path: detections/yara/gguf_magic_bytes.yar
       Description: Matches GGUF model files loaded by llama.cpp

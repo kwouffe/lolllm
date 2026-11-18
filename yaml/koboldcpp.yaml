@@ -98,13 +98,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/koboldcpp_process.yml
-      Description: Detects koboldcpp process creation
-      Phase: Use
-    - Path: detections/sigma/koboldcpp_port_listen.yml
-      Description: Detects network listener on port 5001 (KoboldCpp default)
-      Phase: Use
+  Sigma: []
 
 References:
   - https://github.com/LostRuins/koboldcpp

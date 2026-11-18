@@ -108,13 +108,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/continue_dev_extension.yml
-      Description: Detects creation of continue.continue extension directory in VS Code
-      Phase: Install
-    - Path: detections/sigma/continue_dev_config.yml
-      Description: Detects access to ~/.continue/config.json which may contain API keys
-      Phase: Activation
+  Sigma: []
 
 References:
   - https://continue.dev

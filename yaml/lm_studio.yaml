@@ -156,13 +156,7 @@ Artifacts:
       Phase: Activation
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/lm_studio_network.yml
-      Description: Detects connections from LM Studio to Hugging Face for model downloads
-      Phase: Install
-    - Path: detections/sigma/lm_studio_api_server.yml
-      Description: Detects LM Studio local API server listening on port 1234
-      Phase: Use
+  Sigma: []
   YARA:
     - Path: detections/yara/gguf_magic_bytes.yar
       Description: Matches GGUF model files in LM Studio cache

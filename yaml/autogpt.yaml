@@ -120,16 +120,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/autogpt_process.yml
-      Description: Detects Python running AutoGPT agent
-      Phase: Use
-    - Path: detections/sigma/autogpt_workspace.yml
-      Description: Detects creation of auto_gpt_workspace directory indicating AutoGPT installation
-      Phase: Install
-    - Path: detections/sigma/autogpt_network.yml
-      Description: Detects AutoGPT making broad outbound internet connections via its browsing capability
-      Phase: Abuse
+  Sigma: []
 
 References:
   - https://news.agpt.co

@@ -136,13 +136,7 @@ Artifacts:
       Phase: Activation
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/cursor_network.yml
-      Description: Detects Cursor connecting to api2.cursor.sh or cursor.sh
-      Phase: Use
-    - Path: detections/sigma/cursor_process.yml
-      Description: Detects Cursor.exe process creation
-      Phase: Use
+  Sigma: []
 
 References:
   - https://cursor.com

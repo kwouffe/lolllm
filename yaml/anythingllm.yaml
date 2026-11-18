@@ -124,13 +124,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/anythingllm_process.yml
-      Description: Detects AnythingLLM process creation or Node.js running AnythingLLM backend
-      Phase: Use
-    - Path: detections/sigma/anythingllm_network.yml
-      Description: Detects AnythingLLM listening on port 3001
-      Phase: Use
+  Sigma: []
 
 References:
   - https://anythingllm.com

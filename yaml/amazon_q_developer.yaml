@@ -107,13 +107,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/amazon_q_developer_network.yml
-      Description: Detects connections to Q Developer and CodeWhisperer AWS endpoints
-      Phase: Use
-    - Path: detections/sigma/amazon_q_developer_extension.yml
-      Description: Detects installation of Amazon Q Developer VS Code extension
-      Phase: Install
+  Sigma: []
 
 References:
   - https://aws.amazon.com/q/developer/

@@ -134,13 +134,7 @@ Artifacts:
       Phase: Activation
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/jan_model_download.yml
-      Description: Detects Jan connecting to jan.ai or Hugging Face for model downloads
-      Phase: Install
-    - Path: detections/sigma/jan_api_server.yml
-      Description: Detects Jan local API server on port 1337
-      Phase: Use
+  Sigma: []
 
 References:
   - https://jan.ai

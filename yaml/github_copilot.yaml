@@ -133,13 +133,7 @@ Artifacts:
       Phase: Install
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/github_copilot_network.yml
-      Description: Detects VS Code connecting to copilot-proxy.githubusercontent.com
-      Phase: Use
-    - Path: detections/sigma/github_copilot_extension_install.yml
-      Description: Detects creation of github.copilot extension directory
-      Phase: Install
+  Sigma: []
 
 References:
   - https://github.com/features/copilot

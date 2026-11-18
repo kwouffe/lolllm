@@ -120,13 +120,7 @@ Artifacts:
       Phase: Activation
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/gpt4all_model_download.yml
-      Description: Detects connections to gpt4all.io for model downloads
-      Phase: Install
-    - Path: detections/sigma/gpt4all_process.yml
-      Description: Detects GPT4All process creation
-      Phase: Use
+  Sigma: []
   YARA:
     - Path: detections/yara/gguf_magic_bytes.yar
       Description: Matches GGUF model files in the Nomic AI data directory

@@ -132,16 +132,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/aider_process.yml
-      Description: Detects aider process creation or Python running aider module
-      Phase: Use
-    - Path: detections/sigma/aider_network.yml
-      Description: Detects aider making API calls to OpenAI or Anthropic endpoints
-      Phase: Use
-    - Path: detections/sigma/aider_no_git_flag.yml
-      Description: Detects aider --no-git flag bypassing the git commit audit trail
-      Phase: Abuse
+  Sigma: []
 
 References:
   - https://aider.chat

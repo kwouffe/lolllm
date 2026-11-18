@@ -95,10 +95,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/llamafile_server_expose.yml
-      Description: Detects llamafile bound to 0.0.0.0 (API exposed beyond localhost)
-      Phase: Abuse
+  Sigma: []
   YARA:
     - Path: detections/yara/gguf_magic_bytes.yar
       Description: Matches the embedded GGUF header inside the llamafile executable

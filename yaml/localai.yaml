@@ -97,13 +97,7 @@ Artifacts:
   Registry: []
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/localai_process.yml
-      Description: Detects local-ai process creation
-      Phase: Use
-    - Path: detections/sigma/localai_openai_intercept.yml
-      Description: Detects local-ai listening on port 8080 as an OpenAI API replacement
-      Phase: Abuse
+  Sigma: []
 
 References:
   - https://localai.io
