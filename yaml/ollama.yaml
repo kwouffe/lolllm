@@ -71,10 +71,14 @@ Artifacts:
       Evidence:
         - Type: url
           Ref: https://docs.ollama.com/troubleshooting.md
-          Excerpt: '* `explorer %LOCALAPPDATA%\Programs\Ollama` to browse the binaries (The installer adds this to your user PATH)'
+          Excerpt: >-
+            * `explorer %LOCALAPPDATA%\Programs\Ollama` to browse the binaries (The installer adds this to your user
+            PATH)
         - Type: url
           Ref: https://docs.ollama.com/windows.md
-          Excerpt: '* `explorer %LOCALAPPDATA%\Programs\Ollama` contains the binaries (The installer adds this to your user PATH)'
+          Excerpt: >-
+            * `explorer %LOCALAPPDATA%\Programs\Ollama` contains the binaries (The installer adds this to your user
+            PATH)
         - Type: source
           Ref: https://raw.githubusercontent.com/ollama/ollama/main/scripts/install.ps1
           Excerpt: $ollamaDir = Join-Path $env:LOCALAPPDATA "Programs\Ollama"
@@ -110,10 +114,14 @@ Artifacts:
       Evidence:
         - Type: url
           Ref: https://docs.ollama.com/troubleshooting.md
-          Excerpt: '* `explorer %LOCALAPPDATA%\Ollama` to view logs. The most recent server logs will be in `server.log` and older logs will be in `server-#.log`'
+          Excerpt: >-
+            * `explorer %LOCALAPPDATA%\Ollama` to view logs. The most recent server logs will be in `server.log` and
+            older logs will be in `server-#.log`
         - Type: url
           Ref: https://docs.ollama.com/windows.md
-          Excerpt: '* `explorer %LOCALAPPDATA%\Ollama` contains logs, and downloaded updates * *app.log* contains most resent logs from the GUI application * *server.log* contains the most recent server logs'
+          Excerpt: >-
+            * `explorer %LOCALAPPDATA%\Ollama` contains logs, and downloaded updates * *app.log* contains most
+            resent logs from the GUI application * *server.log* contains the most recent server logs
         - Type: url
           Ref: https://docs.ollama.com/troubleshooting.md
           Excerpt: The most recent server logs will be in `server.log` and older logs will be in `server-#.log`
@@ -137,7 +145,9 @@ Artifacts:
           Excerpt: /home/lab/.ollama/models/manifests/registry.ollama.ai
         - Type: url
           Ref: https://docs.ollama.com/faq.md
-          Excerpt: If a different directory needs to be used, set the environment variable `OLLAMA_MODELS` to the chosen directory.
+          Excerpt: >-
+            If a different directory needs to be used, set the environment variable `OLLAMA_MODELS` to the chosen
+            directory.
     - Path: C:\Users\*\.ollama\models\
       Description: Default model blob store on Windows
       OS: Windows
@@ -150,13 +160,17 @@ Artifacts:
       Evidence:
         - Type: url
           Ref: https://docs.ollama.com/faq.md
-          Excerpt: '* macOS: `~/.ollama/models` * Linux: `/usr/share/ollama/.ollama/models` * Windows: `C:\Users\%username%\.ollama\models`'
+          Excerpt: >-
+            * macOS: `~/.ollama/models` * Linux: `/usr/share/ollama/.ollama/models` * Windows:
+            `C:\Users\%username%\.ollama\models`
         - Type: url
           Ref: https://docs.ollama.com/windows.md
           Excerpt: '* `explorer %HOMEPATH%\.ollama` contains models and configuration'
         - Type: source
           Ref: https://raw.githubusercontent.com/ollama/ollama/v0.5.7/llm/ggml.go
-          Excerpt: // Magic constant for `gguf` files (versioned, gguf) FILE_MAGIC_GGUF_LE = 0x46554747 FILE_MAGIC_GGUF_BE = 0x47475546
+          Excerpt: >-
+            // Magic constant for `gguf` files (versioned, gguf) FILE_MAGIC_GGUF_LE = 0x46554747 FILE_MAGIC_GGUF_BE
+            = 0x47475546
 
   Process:
     - Name: ollama
@@ -170,10 +184,14 @@ Artifacts:
           Evidence:
             - Type: url
               Ref: https://docs.ollama.com/cli.md
-              Excerpt: '### Start Ollama ``` ollama serve ``` To view a list of environment variables that can be set run `ollama serve --help`'
+              Excerpt: >-
+                ### Start Ollama ``` ollama serve ``` To view a list of environment variables that can be set run
+                `ollama serve --help`
             - Type: url
               Ref: https://docs.ollama.com/faq.md
-              Excerpt: Ollama binds 127.0.0.1 port 11434 by default. Change the bind address with the `OLLAMA_HOST` environment variable.
+              Excerpt: >-
+                Ollama binds 127.0.0.1 port 11434 by default. Change the bind address with the `OLLAMA_HOST`
+                environment variable.
             - Type: url
               Ref: https://docs.ollama.com/linux.md
               Excerpt: '[Service] ExecStart=/usr/bin/ollama serve User=ollama Group=ollama Restart=always'
@@ -190,7 +208,9 @@ Artifacts:
               Excerpt: '``` ollama launch claude --model qwen3.5 ```'
             - Type: url
               Ref: https://docs.ollama.com/faq.md
-              Excerpt: 'To preload a model using the CLI, use the command: ```shell theme={"system"} ollama run llama3.2 "" ```'
+              Excerpt: >-
+                To preload a model using the CLI, use the command: ```shell theme={"system"} ollama run llama3.2 ""
+                ```
         - Pattern: 'ollama\s+pull\s+\S+'
           Description: Downloads model weights from registry.ollama.ai
           Phase: Install
@@ -201,10 +221,14 @@ Artifacts:
               Excerpt: '### Download a model ``` ollama pull gemma4 ```'
             - Type: url
               Ref: https://docs.ollama.com/faq.md
-              Excerpt: Ollama pulls models from the Internet and may require a proxy server to access the models. Use `HTTPS_PROXY` to redirect outbound requests through the proxy.
+              Excerpt: >-
+                Ollama pulls models from the Internet and may require a proxy server to access the models. Use
+                `HTTPS_PROXY` to redirect outbound requests through the proxy.
             - Type: url
               Ref: https://docs.ollama.com/api/pull.md
-              Excerpt: 'PullRequest: type: object required: - model properties: model: type: string description: Name of the model to download'
+              Excerpt: >-
+                PullRequest: type: object required: - model properties: model: type: string description: Name of the
+                model to download
       ParentProcess: systemd
       Trust: ai-generated
     - Name: ollama_llama_server
@@ -221,7 +245,9 @@ Artifacts:
               Excerpt: 'runnerCmd := &cobra.Command{ Use: "runner", Short: llama.PrintSystemInfo(), Hidden: true,'
             - Type: source
               Ref: https://raw.githubusercontent.com/ollama/ollama/v0.4.0/llm/server.go
-              Excerpt: server := filepath.Join(dir, "ollama_llama_server") if runtime.GOOS == "windows" { server += ".exe" }
+              Excerpt: >-
+                server := filepath.Join(dir, "ollama_llama_server") if runtime.GOOS == "windows" { server += ".exe"
+                }
       ParentProcess: ollama
       Trust: source-cited
       Evidence:
@@ -253,7 +279,9 @@ Artifacts:
           Excerpt: msg="Listening on 127.0.0.1:11434 (version 0.40.16)"
         - Type: url
           Ref: https://docs.ollama.com/faq.md
-          Excerpt: Ollama binds 127.0.0.1 port 11434 by default. Change the bind address with the `OLLAMA_HOST` environment variable.
+          Excerpt: >-
+            Ollama binds 127.0.0.1 port 11434 by default. Change the bind address with the `OLLAMA_HOST` environment
+            variable.
     - Description: Model registry — Ollama pulls weight blobs from here
       Protocol: TCP
       Ports:
@@ -267,13 +295,17 @@ Artifacts:
       Evidence:
         - Type: lab
           Ref: events
-          Excerpt: '{"product": "linux", "category": "network_connection", "DestinationHostname": "registry.ollama.ai", "DestinationPort": 443, "Initiated": true, "Allowed": true, "DestinationIp": "104.18.16.170"}'
+          Excerpt: >-
+            {"product": "linux", "category": "network_connection", "DestinationHostname": "registry.ollama.ai",
+            "DestinationPort": 443, "Initiated": true, "Allowed": true, "DestinationIp": "104.18.16.170"}
         - Type: lab
           Ref: events
           Excerpt: '"category": "dns_query", "QueryName": "registry.ollama.ai"'
         - Type: lab
           Ref: events
-          Excerpt: '"DestinationHostname": "dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com", "DestinationPort": 443, "Initiated": true, "Allowed": true, "DestinationIp": "172.64.190.1"'
+          Excerpt: >-
+            "DestinationHostname": "dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com", "DestinationPort":
+            443, "Initiated": true, "Allowed": true, "DestinationIp": "172.64.190.1"
 
   Persistence:
     - OS: Linux
@@ -301,12 +333,13 @@ Artifacts:
       Evidence:
         - Type: source
           Ref: https://raw.githubusercontent.com/ollama/ollama/main/app/cmd/app/app_darwin.go
-          Excerpt: launchAgentPath = filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "com.ollama.ollama.plist")
+          Excerpt: >-
+            launchAgentPath = filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "com.ollama.ollama.plist")
         - Type: source
           Ref: https://raw.githubusercontent.com/ollama/ollama/main/app/cmd/app/app_darwin.go
           Excerpt: registerLaunchAgent(hasCompletedFirstRun)
         - Type: source
-          Ref: https://raw.githubusercontent.com/ollama/ollama/main/app/darwin/Ollama.app/Contents/Library/LaunchAgents/com.ollama.ollama.plist
+          Ref: https://raw.githubusercontent.com/ollama/ollama/main/app/darwin/Ollama.app/Contents/Library/LaunchAgents/com.ollama.ollama.plist  # yamllint disable-line rule:line-length
           Excerpt: <key>Label</key> <string>com.ollama.ollama</string>
     - OS: Windows
       Type: Registry
@@ -317,13 +350,19 @@ Artifacts:
       Evidence:
         - Type: source
           Ref: https://raw.githubusercontent.com/ollama/ollama/main/app/ollama.iss
-          Excerpt: 'Root: HKCU; Subkey: "Software\Classes\ollama"; ValueType: string; ValueName: ""; ValueData: "URL:Ollama Protocol"; Flags: uninsdeletekey'
+          Excerpt: >-
+            Root: HKCU; Subkey: "Software\Classes\ollama"; ValueType: string; ValueName: ""; ValueData: "URL:Ollama
+            Protocol"; Flags: uninsdeletekey
         - Type: source
           Ref: https://raw.githubusercontent.com/ollama/ollama/main/app/ollama.iss
-          Excerpt: 'Root: HKCU; Subkey: "Software\Classes\ollama"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""; Flags: uninsdeletekey'
+          Excerpt: >-
+            Root: HKCU; Subkey: "Software\Classes\ollama"; ValueType: string; ValueName: "URL Protocol"; ValueData:
+            ""; Flags: uninsdeletekey
         - Type: source
           Ref: https://raw.githubusercontent.com/ollama/ollama/main/app/ollama.iss
-          Excerpt: 'Root: HKCU; Subkey: "Software\Classes\ollama\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Flags: uninsdeletekey'
+          Excerpt: >-
+            Root: HKCU; Subkey: "Software\Classes\ollama\shell\open\command"; ValueType: string; ValueName: "";
+            ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Flags: uninsdeletekey
 
   EventLog:
     - EventID: 7045
@@ -347,13 +386,19 @@ Artifacts:
       Evidence:
         - Type: source
           Ref: https://raw.githubusercontent.com/ollama/ollama/main/app/ollama.iss
-          Excerpt: 'Root: HKCU; Subkey: "Software\Classes\ollama"; ValueType: string; ValueName: ""; ValueData: "URL:Ollama Protocol"; Flags: uninsdeletekey'
+          Excerpt: >-
+            Root: HKCU; Subkey: "Software\Classes\ollama"; ValueType: string; ValueName: ""; ValueData: "URL:Ollama
+            Protocol"; Flags: uninsdeletekey
         - Type: source
           Ref: https://raw.githubusercontent.com/ollama/ollama/main/app/ollama.iss
-          Excerpt: 'Root: HKCU; Subkey: "Software\Classes\ollama"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""; Flags: uninsdeletekey'
+          Excerpt: >-
+            Root: HKCU; Subkey: "Software\Classes\ollama"; ValueType: string; ValueName: "URL Protocol"; ValueData:
+            ""; Flags: uninsdeletekey
         - Type: source
           Ref: https://raw.githubusercontent.com/ollama/ollama/main/app/ollama.iss
-          Excerpt: 'Root: HKCU; Subkey: "Software\Classes\ollama\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Flags: uninsdeletekey'
+          Excerpt: >-
+            Root: HKCU; Subkey: "Software\Classes\ollama\shell\open\command"; ValueType: string; ValueName: "";
+            ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Flags: uninsdeletekey
 
 Detections:
   Sigma:
