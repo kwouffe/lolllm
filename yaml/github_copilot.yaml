@@ -12,8 +12,13 @@ Description: |
   Copilot configuration.
 Author: '@lolllm-project'
 Created: '2025-01-01'
-LastModified: '2025-01-01'
-ReviewStatus: unreviewed
+LastModified: '2026-11-18'
+ReviewStatus: in-review
+TrustSummary:
+  Min: source-cited
+  Counts:
+    source-cited: 5
+  Excluded: 16
 
 Details:
   Website: https://github.com/features/copilot
@@ -35,36 +40,143 @@ Artifacts:
       OS: Linux
       Type: Cache
       Phase: Install
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: 3b924f7f9d50
+          Excerpt: >-
+            // User settings belong in settings.json. // This file is managed automatically. {
+            "firstLaunchAt": "2026-11-18T11:07:20.118Z" }
+        - Type: lab
+          Ref: 5332a11b3177
+          Excerpt: -rw-r--r-- 1 lab lab 36 Nov 18 11:06 deviceid 0430fbbf-e703-415e-8e88-c550faff194f
+        - Type: lab
+          Ref: 5332a11b3177
+          Excerpt: -rw-r--r-- 1 lab lab 0 Nov 18 11:06 .extraction-complete
     - Path: ~/.vscode/extensions/github.copilot-chat-*/
       Description: GitHub Copilot Chat extension directory (Linux/macOS)
       OS: Linux
       Type: Cache
       Phase: Install
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: >-
+            Extensions are installed in a per user extensions folder. Depending on your platform,
+            the location is in the following folder:
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: '* **macOS** `~/.vscode/extensions` * **Linux** `~/.vscode/extensions`'
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/extensionManagement/common/extensionManagementUtil.ts
+          Excerpt: >-
+            return `${this.id}-${this.version}${this.targetPlatform !== TargetPlatform.UNDEFINED ?
+            `-${this.targetPlatform}` : ''}`;
     - Path: C:\Users\*\.vscode\extensions\github.copilot-*\
       Description: GitHub Copilot extension directory (Windows)
       OS: Windows
       Type: Cache
       Phase: Install
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: >-
+            Extensions are installed in a per user extensions folder. Depending on your platform,
+            the location is in the following folder:
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: '* **Windows** `%USERPROFILE%\.vscode\extensions`'
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/extensionManagement/common/extensionManagementUtil.ts
+          Excerpt: >-
+            return `${this.id}-${this.version}${this.targetPlatform !== TargetPlatform.UNDEFINED ?
+            `-${this.targetPlatform}` : ''}`;
     - Path: C:\Users\*\.vscode\extensions\github.copilot-chat-*\
       Description: GitHub Copilot Chat extension directory (Windows)
       OS: Windows
       Type: Cache
       Phase: Install
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: >-
+            Extensions are installed in a per user extensions folder. Depending on your platform,
+            the location is in the following folder:
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: '* **Windows** `%USERPROFILE%\.vscode\extensions`'
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/extensionManagement/common/extensionManagementUtil.ts
+          Excerpt: >-
+            return `${this.id}-${this.version}${this.targetPlatform !== TargetPlatform.UNDEFINED ?
+            `-${this.targetPlatform}` : ''}`;
     - Path: ~/.config/Code/User/globalStorage/github.copilot/
       Description: Copilot global storage including cached OAuth tokens (Linux)
       OS: Linux
       Type: Config
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference
+          Excerpt: By default, this directory is `~/.copilot` (that is, `$HOME/.copilot`).
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference
+          Excerpt: '| `mcp-config.json` | File | User-level MCP server definitions |'
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference
+          Excerpt: >-
+            | `config.json` | File | Automatically managed application state (authentication,
+            installed plugins, and other internal data) |
     - Path: ~/Library/Application Support/Code/User/globalStorage/github.copilot/
       Description: Copilot global storage (macOS)
       OS: macOS
       Type: Config
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/environment/node/userDataPath.ts
+          Excerpt: "case 'darwin': appDataPath = join(homedir(), 'Library', 'Application Support');"
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/environment/node/userDataPath.ts
+          Excerpt: return join(appDataPath, productName); }
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/environment/common/environmentService.ts
+          Excerpt: "get appSettingsHome(): URI { return URI.file(join(this.userDataPath, 'User')); }"
     - Path: C:\Users\*\AppData\Roaming\Code\User\globalStorage\github.copilot\
       Description: Copilot global storage including cached OAuth tokens (Windows)
       OS: Windows
       Type: Config
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/environment/node/userDataPath.ts
+          Excerpt: >-
+            appDataPath = process.env['APPDATA']; if (!appDataPath) { const userProfile =
+            process.env['USERPROFILE'];
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/environment/node/userDataPath.ts
+          Excerpt: return join(appDataPath, productName); }
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/environment/common/environmentService.ts
+          Excerpt: "get appSettingsHome(): URI { return URI.file(join(this.userDataPath, 'User')); }"
 
   ModelStorage: []
 
@@ -76,7 +188,16 @@ Artifacts:
         - Pattern: 'code\s+--type=extensionHost'
           Description: VS Code extension host where Copilot runs
           Phase: Use
+          Trust: ai-generated
       ParentProcess: code
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: '414895252433'
+          Excerpt: GitHub Copilot CLI - An AI-powered coding assistant.
+        - Type: lab
+          Ref: da87c7243719
+          Excerpt: GitHub Copilot CLI 1.0.114
     - Name: node
       Description: Some Copilot language server components may spawn a Node.js subprocess
       Phase: Use
@@ -84,7 +205,13 @@ Artifacts:
         - Pattern: 'node.*copilot'
           Description: Copilot language server subprocess
           Phase: Use
+          Trust: ai-generated
       ParentProcess: code
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: 0ce2b1a39172
+          Excerpt: /usr/local/bin/copilot -> ../lib/node_modules/@github/copilot/npm-loader.js
 
   Network:
     - Description: GitHub Copilot inference proxy — receives code context
@@ -97,6 +224,18 @@ Artifacts:
         - copilot.github.com
         - api.githubcopilot.com
       Phase: Use
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: bb71aa996885
+          Excerpt: To authenticate, visit https://github.com/login/device and enter code F8AD-C9A2
+        - Type: lab
+          Ref: 29c5c74fb879
+          Excerpt: Checking GitHub for the latest release...
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-allowlist-reference
+          Excerpt: '| `https://copilot-proxy.githubusercontent.com` | API service for Copilot suggestions'
     - Description: GitHub OAuth and telemetry
       Protocol: TCP
       Ports:
@@ -107,6 +246,20 @@ Artifacts:
         - vscode.dev
         - dc.services.visualstudio.com
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-allowlist-reference
+          Excerpt: '| `https://copilot-telemetry.githubusercontent.com/telemetry` | Copilot client telemetry'
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-allowlist-reference
+          Excerpt: '| `https://collector.github.com/*` | Analytics telemetry'
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-allowlist-reference
+          Excerpt: '| `https://github.com/login/*` | Authentication'
 
   Persistence:
     - OS: Windows
@@ -114,11 +267,13 @@ Artifacts:
       Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Code
       Description: VS Code auto-start — Copilot active whenever VS Code launches
       Phase: Activation
+      Trust: ai-cross-checked
     - OS: macOS
       Type: LaunchAgent
       Path: ~/Library/LaunchAgents/com.microsoft.VSCode.plist
       Description: VS Code LaunchAgent — Copilot loaded at every VS Code startup
       Phase: Activation
+      Trust: ai-cross-checked
 
   EventLog:
     - EventID: 5156
@@ -126,11 +281,13 @@ Artifacts:
       LogFile: Security.evtx
       Description: Network connection from Code.exe to copilot-proxy.githubusercontent.com:443
       Phase: Use
+      Trust: ai-cross-checked
 
   Registry:
     - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\GitHub Copilot
       Description: Copilot extension registration in Windows registry (if applicable)
       Phase: Install
+      Trust: ai-cross-checked
 
 Detections:
   Sigma: []
