@@ -12,8 +12,13 @@ Description: |
   Workspace artifacts persist between sessions in auto_gpt_workspace/.
 Author: '@lolllm-project'
 Created: '2025-01-01'
-LastModified: '2025-01-01'
-ReviewStatus: unreviewed
+LastModified: '2026-11-18'
+ReviewStatus: in-review
+TrustSummary:
+  Min: source-cited
+  Counts:
+    source-cited: 1
+  Excluded: 17
 
 Details:
   Website: https://news.agpt.co
@@ -37,26 +42,82 @@ Artifacts:
       OS: Any
       Type: Log
       Phase: Use
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/v0.4.7/.env.template
+          Excerpt: >-
+            ## RESTRICT_TO_WORKSPACE - Restrict file operations to workspace ./auto_gpt_workspace
+            (Default: True)
+        - Type: url
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/platform/single-container.md
+          Excerpt: >-
+            All durable state is stored under `/data`. Use a named Docker volume for every
+            installation you intend to keep.
+        - Type: url
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/platform/single-container.md
+          Excerpt: >-
+            | `/data/config` | Generated runtime secrets and backend configuration | |
+            `/data/postgres` | Authentication and platform data |
     - Path: ./.env
       Description: AutoGPT environment configuration — contains OPENAI_API_KEY and optionally other credentials
       OS: Any
       Type: Config
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/v0.4.7/autogpt/__init__.py
+          Excerpt: >-
+            # Load the users .env file into environment variables load_dotenv(verbose=True,
+            override=True)
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/v0.4.7/autogpt/config/config.py
+          Excerpt: '"openai_api_key": os.getenv("OPENAI_API_KEY"),'
+        - Type: source
+          Ref: https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/v0.4.7/.gitignore
+          Excerpt: auto_gpt_workspace/* *.mpeg .env azure.yaml ai_settings.yaml
     - Path: ./ai_settings.yaml
       Description: AutoGPT agent configuration — defines agent name, role, and goals
       OS: Any
       Type: Config
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/v0.4.7/.env.template
+          Excerpt: >-
+            ## AI_SETTINGS_FILE - Specifies which AI Settings file to use, relative to the Auto-GPT
+            root directory. (defaults to ai_settings.yaml)
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/v0.4.7/autogpt/config/config.py
+          Excerpt: AI_SETTINGS_FILE = "ai_settings.yaml"
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/v0.4.7/autogpt/app/main.py
+          Excerpt: ai_config = AIConfig.load(config.workdir / config.ai_settings_file)
     - Path: ~/.config/AutoGPT/
       Description: AutoGPT global configuration directory (newer versions)
       OS: Linux
       Type: Config
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/classic/pyproject.toml
+          Excerpt: python-dotenv = "^1.0.0"
     - Path: ./memory/
       Description: AutoGPT persistent memory files (JSON or vector database)
       OS: Any
       Type: Log
       Phase: Use
+      Trust: ai-generated
 
   ModelStorage: []
 
@@ -68,13 +129,48 @@ Artifacts:
         - Pattern: 'python.*autogpt'
           Description: AutoGPT agent running
           Phase: Use
+          Trust: source-cited
+          Evidence:
+            - Type: source
+              Ref: >-
+                https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/26324f29849967fa72c207da929af612f1740669/autogpts/autogpt/pyproject.toml
+              Excerpt: '[tool.poetry.scripts] autogpt = "autogpt.app.cli:cli" serve = "autogpt.app.cli:serve"'
+            - Type: source
+              Ref: >-
+                https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/26324f29849967fa72c207da929af612f1740669/autogpts/autogpt/README.md
+              Excerpt: 'Usage: python -m autogpt [OPTIONS] COMMAND [ARGS]...'
+            - Type: source
+              Ref: >-
+                https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/26324f29849967fa72c207da929af612f1740669/autogpts/autogpt/autogpt/__main__.py
+              Excerpt: >-
+                """AutoGPT: A GPT powered AI Assistant""" import autogpt.app.cli if __name__ ==
+                "__main__": autogpt.app.cli.cli()
         - Pattern: 'python.*run\s+serve'
           Description: AutoGPT API server mode (newer versions)
           Phase: Activation
+          Trust: ai-generated
         - Pattern: 'autogpt\s+'
           Description: AutoGPT CLI direct invocation
           Phase: Use
+          Trust: source-cited
+          Evidence:
+            - Type: source
+              Ref: >-
+                https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/26324f29849967fa72c207da929af612f1740669/autogpts/autogpt/pyproject.toml
+              Excerpt: '[tool.poetry.scripts] autogpt = "autogpt.app.cli:cli" serve = "autogpt.app.cli:serve"'
+            - Type: source
+              Ref: >-
+                https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/26324f29849967fa72c207da929af612f1740669/autogpts/autogpt/autogpt/app/cli.py
+              Excerpt: >-
+                @click.group(invoke_without_command=True) @click.pass_context def cli(ctx:
+                click.Context): setup_telemetry() # Invoke `run` by default if ctx.invoked_subcommand is
+                None: ctx.invoke(run)
+            - Type: source
+              Ref: >-
+                https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/26324f29849967fa72c207da929af612f1740669/autogpts/autogpt/autogpt.sh
+              Excerpt: poetry run autogpt "$@"
       ParentProcess: bash
+      Trust: ai-generated
 
   Network:
     - Description: OpenAI API — primary LLM inference provider
@@ -85,6 +181,16 @@ Artifacts:
       Domains:
         - api.openai.com
       Phase: Use
+      Trust: source-cited
+      Evidence:
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/autogpt_platform/backend/backend/util/llm/providers.py
+          Excerpt: client = openai.AsyncOpenAI(api_key=api_key)
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/autogpt_platform/backend/backend/util/llm/providers.py
+          Excerpt: 'if provider == "openai": return await _call_openai_responses('
     - Description: Arbitrary internet access via browsing capability
       Protocol: TCP
       Ports:
@@ -94,6 +200,24 @@ Artifacts:
       Domains:
         - '*'
       Phase: Abuse
+      Trust: source-cited
+      Evidence:
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/autogpt_platform/backend/backend/blocks/http.py
+          Excerpt: >-
+            url: str = SchemaField( description="The URL to send the request to",
+            placeholder="https://api.example.com",
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/autogpt_platform/backend/backend/blocks/http.py
+          Excerpt: description="Make an HTTP request (JSON / form / multipart).",
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/autogpt_platform/backend/backend/util/egress_proxy.py
+          Excerpt: >-
+            programs that do their own networking (the Chromium behind the Copilot browser tools)
+            never pass through it
     - Description: AutoGPT Platform API (hosted version)
       Protocol: TCP
       Ports:
@@ -102,6 +226,11 @@ Artifacts:
       Domains:
         - api.agpt.co
       Phase: Use
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://platform.agpt.co/
+          Excerpt: sentry-environment=app%3Aprod-behave%3Acloud
 
   Persistence:
     - OS: Linux
@@ -109,6 +238,7 @@ Artifacts:
       Path: /etc/cron.d/autogpt
       Description: Cron job running AutoGPT for scheduled autonomous task execution
       Phase: Activation
+      Trust: ai-generated
 
   EventLog:
     - EventID: 4688
@@ -116,6 +246,24 @@ Artifacts:
       LogFile: Security.evtx
       Description: Python.exe process running AutoGPT — may spawn child processes for tool use
       Phase: Use
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/platform/installer.md
+          Excerpt: >-
+            `%LOCALAPPDATA%\AutoGPT` on Windows. A custom directory must be user-owned and private;
+            the installer rejects symlink paths and shared or unsafe locations.
+        - Type: url
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/platform/getting-started.md
+          Excerpt: >-
+            On Windows, where `make` is usually not installed, clone the repository as below, then
+            run `autogpt_platform\installer\setup-autogpt.bat` instead of the remaining steps.
+        - Type: url
+          Ref: >-
+            https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/platform/getting-started.md
+          Excerpt: docker run -d \ --name autogpt \ --restart unless-stopped \ --shm-size 2g \
 
   Registry: []
 
