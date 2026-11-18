@@ -12,8 +12,15 @@ Description: |
   Copilot configuration.
 Author: '@lolllm-project'
 Created: '2025-01-01'
-LastModified: '2025-01-01'
+LastModified: '2026-11-18'
 ReviewStatus: unreviewed
+TrustSummary:
+  Min: ai-generated
+  Counts:
+    ai-generated: 1
+    source-cited: 7
+    lab-observed: 1
+  Excluded: 14
 
 Details:
   Website: https://github.com/features/copilot
@@ -35,36 +42,133 @@ Artifacts:
       OS: Linux
       Type: Cache
       Phase: Install
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: 51419d02fb07
+          Excerpt: >-
+            total 12 drwxr-xr-x 2 lab lab 4096 Nov 17 06:32 . drwxr-xr-x 3 lab lab 4096 Nov 17 06:32
+            .. -rw-r--r-- 1 lab lab 2 Nov 17 06:32 extensions.json
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: >-
+            * **Windows** `%USERPROFILE%\.vscode\extensions` * **macOS** `~/.vscode/extensions` *
+            **Linux** `~/.vscode/extensions`
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: >-
+            You can change the location by launching VS Code with the `--extensions-dir <dir>`
+            command-line [option](/docs/configure/command-line.md).
     - Path: ~/.vscode/extensions/github.copilot-chat-*/
       Description: GitHub Copilot Chat extension directory (Linux/macOS)
       OS: Linux
       Type: Cache
       Phase: Install
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: fecf52231c3e
+          Excerpt: Updating the extension 'github.copilot-chat' to the version 0.48.1
+        - Type: lab
+          Ref: 51419d02fb07
+          Excerpt: >-
+            total 12 drwxr-xr-x 2 lab lab 4096 Nov 17 06:32 . drwxr-xr-x 3 lab lab 4096 Nov 17 06:32
+            .. -rw-r--r-- 1 lab lab 2 Nov 17 06:32 extensions.json
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: >-
+            * **Windows** `%USERPROFILE%\.vscode\extensions` * **macOS** `~/.vscode/extensions` *
+            **Linux** `~/.vscode/extensions`
     - Path: C:\Users\*\.vscode\extensions\github.copilot-*\
       Description: GitHub Copilot extension directory (Windows)
       OS: Windows
       Type: Cache
       Phase: Install
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: >-
+            * **Windows** `%USERPROFILE%\.vscode\extensions` * **macOS** `~/.vscode/extensions` *
+            **Linux** `~/.vscode/extensions`
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: >-
+            You can change the location by launching VS Code with the `--extensions-dir <dir>`
+            command-line [option](/docs/configure/command-line.md).
+        - Type: source
+          Ref: https://raw.githubusercontent.com/microsoft/vscode/main/product.json
+          Excerpt: >-
+            "defaultChatAgent": { "extensionId": "GitHub.copilot", "chatExtensionId":
+            "GitHub.copilot-chat",
     - Path: C:\Users\*\.vscode\extensions\github.copilot-chat-*\
       Description: GitHub Copilot Chat extension directory (Windows)
       OS: Windows
       Type: Cache
       Phase: Install
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: >-
+            * **Windows** `%USERPROFILE%\.vscode\extensions` * **macOS** `~/.vscode/extensions` *
+            **Linux** `~/.vscode/extensions`
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/configure/extensions/extension-marketplace.md
+          Excerpt: >-
+            You can change the location by launching VS Code with the `--extensions-dir <dir>`
+            command-line [option](/docs/configure/command-line.md).
+        - Type: source
+          Ref: https://raw.githubusercontent.com/microsoft/vscode-copilot-chat/main/package.json
+          Excerpt: >-
+            "name": "copilot-chat", "displayName": "GitHub Copilot Chat", "description": "AI chat
+            features powered by Copilot", "version": "0.44.0",
     - Path: ~/.config/Code/User/globalStorage/github.copilot/
       Description: Copilot global storage including cached OAuth tokens (Linux)
       OS: Linux
       Type: Config
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference
+          Excerpt: >-
+            Copilot CLI stores its configuration, session history, logs, and customizations in a
+            single directory on your machine. By default, this directory is `~/.copilot`
+        - Type: source
+          Ref: >-
+            https://api.github.com/search/issues?q=repo:github/copilot.vim+github-copilot+config+dir+hosts.json&per_page=20
+          Excerpt: ~/.config/github-copilot/apps.json not created/saved even though authentication succeeds
+        - Type: source
+          Ref: >-
+            https://api.github.com/search/issues?q=repo:github/copilot.vim+github-copilot+config+dir+hosts.json&per_page=20
+          Excerpt: it contains auth.db, auth.db-shm, auth.db-wal, versions.json, but not apps.json
     - Path: ~/Library/Application Support/Code/User/globalStorage/github.copilot/
       Description: Copilot global storage (macOS)
       OS: macOS
       Type: Config
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference
+          Excerpt: >-
+            Copilot CLI stores its configuration, session history, logs, and customizations in a
+            single directory on your machine. By default, this directory is `~/.copilot`
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference
+          Excerpt: >-
+            You can change the location of this directory by setting the `COPILOT_HOME` environment
+            variable to a different path.
     - Path: C:\Users\*\AppData\Roaming\Code\User\globalStorage\github.copilot\
       Description: Copilot global storage including cached OAuth tokens (Windows)
       OS: Windows
       Type: Config
       Phase: Activation
+      Trust: ai-generated
 
   ModelStorage: []
 
@@ -76,7 +180,28 @@ Artifacts:
         - Pattern: 'code\s+--type=extensionHost'
           Description: VS Code extension host where Copilot runs
           Phase: Use
+          Trust: source-cited
+          Evidence:
+            - Type: source
+              Ref: >-
+                https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/workbench/services/extensions/electron-browser/localProcessExtensionHost.ts
+              Excerpt: "VSCODE_ESM_ENTRYPOINT: 'vs/workbench/api/node/extensionHostProcess',"
       ParentProcess: code
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: 75583ffba851
+          Excerpt: 2855 ppid=1 2857 ppid=1 2858 ppid=1
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/extensions/electron-main/extensionHostStarter.ts
+          Excerpt: >-
+            const extHost = new WindowUtilityProcess(this._logService, this._windowsMainService,
+            this._telemetryService, this._lifecycleMainService);
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/workbench/services/extensions/electron-browser/localProcessExtensionHost.ts
+          Excerpt: "VSCODE_ESM_ENTRYPOINT: 'vs/workbench/api/node/extensionHostProcess',"
     - Name: node
       Description: Some Copilot language server components may spawn a Node.js subprocess
       Phase: Use
@@ -84,7 +209,22 @@ Artifacts:
         - Pattern: 'node.*copilot'
           Description: Copilot language server subprocess
           Phase: Use
+          Trust: lab-observed
+          Evidence:
+            - Type: lab
+              Ref: dd1d11058f19
+              Excerpt: >-
+                GitHub Copilot CLI was not found. Run copilot in a terminal to install it, or see
+                https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli
       ParentProcess: code
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: dd1d11058f19
+          Excerpt: >-
+            GitHub Copilot CLI was not found. Run copilot in a terminal to install it, or see
+            https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli
+
 
   Network:
     - Description: GitHub Copilot inference proxy — receives code context
@@ -97,6 +237,24 @@ Artifacts:
         - copilot.github.com
         - api.githubcopilot.com
       Phase: Use
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-allowlist-reference
+          Excerpt: '| `https://copilot-proxy.githubusercontent.com` | API service for Copilot suggestions'
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-allowlist-reference
+          Excerpt: >-
+            | `https://*.githubcopilot.com/*` | API service for Copilot suggestions. Allows access
+            to authorized users regardless of Copilot plan.
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-allowlist-reference
+          Excerpt: >-
+            | `https://*.individual.githubcopilot.com` | API service for Copilot suggestions. Allows
+            access to authorized users via a Copilot Individual plan.
     - Description: GitHub OAuth and telemetry
       Protocol: TCP
       Ports:
@@ -107,6 +265,22 @@ Artifacts:
         - vscode.dev
         - dc.services.visualstudio.com
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-allowlist-reference
+          Excerpt: '| `https://github.com/login/*` | Authentication'
+        - Type: url
+          Ref: >-
+            https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-allowlist-reference
+          Excerpt: In addition to these domains, we recommend allowing the apex domain `github.com`.
+        - Type: url
+          Ref: https://code.visualstudio.com/docs/setup/network.md
+          Excerpt: >-
+            * `vscode.dev` - Used as a fallback when logging in with GitHub or Microsoft for an
+            extension or Settings Sync (just `vscode.dev/redirect`)
+
 
   Persistence:
     - OS: Windows
@@ -114,11 +288,21 @@ Artifacts:
       Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Code
       Description: VS Code auto-start — Copilot active whenever VS Code launches
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: source
+          Ref: https://raw.githubusercontent.com/microsoft/vscode-copilot-chat/main/package.json
+          Excerpt: '"activationEvents": [ "onStartupFinished",'
     - OS: macOS
       Type: LaunchAgent
       Path: ~/Library/LaunchAgents/com.microsoft.VSCode.plist
       Description: VS Code LaunchAgent — Copilot loaded at every VS Code startup
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: source
+          Ref: https://raw.githubusercontent.com/microsoft/vscode-copilot-chat/main/package.json
+          Excerpt: '"activationEvents": [ "onStartupFinished",'
 
   EventLog:
     - EventID: 5156
@@ -126,20 +310,16 @@ Artifacts:
       LogFile: Security.evtx
       Description: Network connection from Code.exe to copilot-proxy.githubusercontent.com:443
       Phase: Use
+      Trust: ai-generated
 
   Registry:
     - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\GitHub Copilot
       Description: Copilot extension registration in Windows registry (if applicable)
       Phase: Install
+      Trust: ai-generated
 
 Detections:
-  Sigma:
-    - Path: detections/sigma/github_copilot_network.yml
-      Description: Detects VS Code connecting to copilot-proxy.githubusercontent.com
-      Phase: Use
-    - Path: detections/sigma/github_copilot_extension_install.yml
-      Description: Detects creation of github.copilot extension directory
-      Phase: Install
+  Sigma: []
 
 References:
   - https://github.com/features/copilot
