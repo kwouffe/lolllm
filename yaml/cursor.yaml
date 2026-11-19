@@ -11,8 +11,13 @@ Description: |
   than VS Code extensions.
 Author: '@lolllm-project'
 Created: '2025-01-01'
-LastModified: '2025-01-01'
-ReviewStatus: unreviewed
+LastModified: '2026-11-19'
+ReviewStatus: in-review
+TrustSummary:
+  Min: source-cited
+  Counts:
+    source-cited: 3
+  Excluded: 19
 
 Details:
   Website: https://cursor.com
@@ -34,36 +39,127 @@ Artifacts:
       OS: macOS
       Type: Binary
       Phase: Install
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/endpoint-security.md
+          Excerpt: '**Processes:** `Cursor.app`'
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/endpoint-security.md
+          Excerpt: '| `/Applications/Cursor.app/` | Application bundle |'
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/deployment-patterns.md
+          Excerpt: >-
+            /Applications/Cursor.app/Contents/Resources/app/policies/com.todesktop.230313mzl4w4u92.mobileconfig
     - Path: C:\Users\*\AppData\Local\Programs\cursor\Cursor.exe
       Description: Cursor application binary (Windows)
       OS: Windows
       Type: Binary
       Phase: Install
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/endpoint-security.md
+          Excerpt: '| `Cursor.exe` | User | `%LOCALAPPDATA%\Programs\cursor\Cursor.exe`'
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/endpoint-security.md
+          Excerpt: '| `Cursor.exe` | User | `%LOCALAPPDATA%\Programs\cursor\Cursor.exe` |'
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/endpoint-security.md
+          Excerpt: '| `Cursor.exe` | System | `%ProgramFiles%\cursor\Cursor.exe` |'
     - Path: /usr/bin/cursor
       Description: Cursor binary (Linux system install)
       OS: Linux
       Type: Binary
       Phase: Install
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: 3cc808335299
+          Excerpt: lrwxrwxrwx 1 root root 28 Nov 19 09:31 cursor -> /usr/share/cursor/bin/cursor
+        - Type: lab
+          Ref: d5256f24e61b
+          Excerpt: >-
+            --- /etc/apt/sources.list.d --- total 16 drwxr-xr-x 1 root root 4096 Nov 19 09:50 .
+            drwxr-xr-x 1 root root 4096 Nov 4 21:23 .. -rw-r--r-- 1 root root 445 Nov 19 09:29
+            debian.sources
+        - Type: lab
+          Ref: 8c6245bdf9f8
+          Excerpt: Purging configuration files for cursor (3.30.14-1794552202) ...
     - Path: ~/.config/Cursor/
       Description: Cursor configuration directory including settings and AI API configuration (Linux)
       OS: Linux
       Type: Config
       Phase: Activation
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: d076d28ccb01
+          Excerpt: >-
+            drwx------ 3 lab lab 4096 Nov 19 09:47 . drwxr-xr-x 1 lab lab 4096 Nov 19 09:47 ..
+            drwx------ 22 lab lab 4096 Nov 19 09:48 Cursor
+        - Type: lab
+          Ref: e090d5eb2052
+          Excerpt: >-
+            4066 3986 /usr/share/cursor/cursor --type=renderer --crashpad-handler-pid=4002
+            --enable-crash-reporter=bc895b75-2a8c-4669-928a-c92427234afc,no_channel
+            --user-data-dir=/home/lab/.config/Cursor
+        - Type: url
+          Ref: https://cursor.com/docs/cli/reference/configuration.md
+          Excerpt: '| Global | macOS/Linux | `~/.cursor/cli-config.json` |'
     - Path: ~/Library/Application Support/Cursor/
       Description: Cursor application data and configuration (macOS)
       OS: macOS
       Type: Config
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://cursor.com/docs/cli/reference/configuration.md
+          Excerpt: '| Global | macOS/Linux | `~/.cursor/cli-config.json` |'
+        - Type: url
+          Ref: https://cursor.com/help/troubleshooting/install-issues.md
+          Excerpt: If you use Cursor Agent, generated worktrees under `~/.cursor/worktrees/` can add up.
+        - Type: url
+          Ref: https://forum.cursor.com/t/cursor-keeps-crashing-on-start/153487/5
+          Excerpt: >-
+            Deleting ~/Library/Application\ Support/Cursor is a solid fix, but next time you can try
+            a less drastic approach:
     - Path: C:\Users\*\AppData\Roaming\Cursor\
       Description: Cursor application data (Windows)
       OS: Windows
       Type: Config
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/endpoint-security.md
+          Excerpt: '| `%APPDATA%\Cursor\` | User data, settings, and workspace storage |'
+        - Type: url
+          Ref: https://cursor.com/docs/cli/reference/configuration.md
+          Excerpt: '| Global | Windows | `$env:USERPROFILE\.cursor\cli-config.json` |'
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/environment/node/userDataPath.ts
+          Excerpt: return join(appDataPath, productName);
     - Path: ~/.cursor/extensions/
       Description: Cursor-specific extensions directory (separate from VS Code)
       OS: Linux
       Type: Cache
       Phase: Install
+      Trust: lab-observed
+      Evidence:
+        - Type: lab
+          Ref: d076d28ccb01
+          Excerpt: >-
+            drwxr-xr-x 3 lab lab 4096 Nov 19 09:48 extensions drwxr-xr-x 3 lab lab 4096 Nov 19 09:48
+            plugins drwxr-xr-x 3 lab lab 4096 Nov 19 09:48 projects
+        - Type: lab
+          Ref: d076d28ccb01
+          Excerpt: drwxr-xr-x 5 lab lab 4096 Nov 19 09:48 anysphere.remote-ssh-1.1.19
+        - Type: lab
+          Ref: 763e6243d395
+          Excerpt: 'PRESENT: /home/lab/.cursor/extensions PRESENT: /home/lab/.cursor/agents'
 
   ModelStorage: []
 
@@ -75,7 +171,36 @@ Artifacts:
         - Pattern: 'Cursor\s+--type=extensionHost'
           Description: Cursor extension host process (AI features run here)
           Phase: Use
+          Trust: lab-observed
+          Evidence:
+            - Type: lab
+              Ref: e090d5eb2052
+              Excerpt: >-
+                3983 1 /usr/share/cursor/cursor --no-sandbox --disable-gpu 3985 3983
+                /usr/share/cursor/cursor --type=zygote --no-zygote-sandbox --no-sandbox
+            - Type: lab
+              Ref: e090d5eb2052
+              Excerpt: >-
+                4024 3983 /usr/share/cursor/cursor --type=gpu-process --disable-gpu-sandbox --no-sandbox
+                --ozone-platform=x11 --crashpad-handler-pid=4002
+            - Type: url
+              Ref: https://cursor.com/docs/enterprise/endpoint-security.md
+              Excerpt: >-
+                Cursor's extension host reads JavaScript files from its own install directory at
+                startup.
       ParentProcess: launchd
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/endpoint-security.md
+          Excerpt: '| `Cursor.exe` | User | `%LOCALAPPDATA%\Programs\cursor\Cursor.exe`'
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/endpoint-security.md
+          Excerpt: '| `/Applications/Cursor.app/` | Application bundle |'
+        - Type: source
+          Ref: >-
+            https://raw.githubusercontent.com/electron/electron/main/shell/browser/api/electron_api_utility_process.cc
+          Excerpt: constexpr std::array default_stdio{
     - Name: cursor
       Description: Cursor CLI launcher (Linux/macOS)
       Phase: Use
@@ -83,7 +208,26 @@ Artifacts:
         - Pattern: '^cursor\s+'
           Description: Cursor launched from terminal
           Phase: Use
+          Trust: lab-observed
+          Evidence:
+            - Type: lab
+              Ref: e090d5eb2052
+              Excerpt: >-
+                4195 4106 /usr/share/cursor/cursor --dns-result-order=ipv4first
+                --experimental-network-inspection
+                /usr/share/cursor/resources/app/extensions/cursor-always-local/dist/gitWorker.js
+            - Type: url
+              Ref: https://cursor.com/help/troubleshooting/performance.md
+              Excerpt: Run `cursor --disable-extensions` to test
+            - Type: source
+              Ref: https://raw.githubusercontent.com/microsoft/vscode/main/resources/darwin/bin/code.sh
+              Excerpt: ELECTRON="$CONTENTS/MacOS/@@NAME@@" CLI="$CONTENTS/Resources/app/out/cli.js"
       ParentProcess: bash
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://cursor.com/help/troubleshooting/performance.md
+          Excerpt: Run `cursor --disable-extensions` to test
 
   Network:
     - Description: Cursor AI backend proxy — primary inference endpoint
@@ -96,6 +240,19 @@ Artifacts:
         - api.cursor.sh
         - cursor.sh
       Phase: Use
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/network-configuration.md
+          Excerpt: '- `api2.cursor.sh`: Used for most API requests.'
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/network-configuration.md
+          Excerpt: >-
+            Rather than maintaining IP address lists (which can change), configure your firewall to
+            allow traffic to these domain patterns:
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/network-configuration.md
+          Excerpt: "- `api5.cursor.sh`: Used for Cursor's agent requests."
     - Description: Forwarded requests to Anthropic and OpenAI via Cursor proxy
       Protocol: TCP
       Ports:
@@ -105,6 +262,14 @@ Artifacts:
         - api.anthropic.com
         - api.openai.com
       Phase: Use
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://cursor.com/docs/enterprise/privacy-and-data-governance.md
+          Excerpt: >-
+            A custom model reached via an OpenAI-compatible base URL override or a third-party
+            gateway carries the region of that gateway or model, which may not be in the US.
+
 
   Persistence:
     - OS: macOS
@@ -112,11 +277,33 @@ Artifacts:
       Path: ~/Library/LaunchAgents/sh.cursor.Cursor.plist
       Description: Cursor LaunchAgent for auto-start
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable
+          Excerpt: >-
+            "debUrl":"https://downloads.cursor.com/production/5f54c8173e5552412beb40702adac16275677fa0/linux/x64/deb/amd64/deb/cursor_3.30.14_amd64.deb"
+        - Type: source
+          Ref: >-
+            https://downloads.cursor.com/production/5f54c8173e5552412beb40702adac16275677fa0/linux/x64/deb/amd64/deb/cursor_3.30.14_amd64.deb
+          Excerpt: data.tar.xz 1794552217 0 0 100644 228312552 `
     - OS: Windows
       Type: Registry
       Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Cursor
       Description: Cursor auto-start registry key
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://forum.cursor.com/t/167044.json
+          Excerpt: ~/Library/Caches/com.todesktop.230313mzl4w4u92.ShipIt/ShipItState.plist
+        - Type: url
+          Ref: https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable
+          Excerpt: >-
+            "debUrl":"https://downloads.cursor.com/production/5f54c8173e5552412beb40702adac16275677fa0/linux/x64/deb/amd64/deb/cursor_3.30.14_amd64.deb"
+        - Type: source
+          Ref: https://raw.githubusercontent.com/electron/electron/main/shell/browser/browser_win.cc
+          Excerpt: constexpr base::wcstring_view Run = LR"(Software\Microsoft\Windows\CurrentVersion\Run)";
 
   EventLog:
     - EventID: 4688
@@ -124,16 +311,33 @@ Artifacts:
       LogFile: Security.evtx
       Description: Process creation for Cursor.exe
       Phase: Use
+      Trust: ai-generated
     - EventID: 5156
       ProviderName: Microsoft-Windows-Security-Auditing
       LogFile: Security.evtx
       Description: Network connection from Cursor.exe to api2.cursor.sh:443
       Phase: Use
+      Trust: ai-generated
 
   Registry:
     - Path: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Cursor
       Description: Cursor auto-start persistence key
       Phase: Activation
+      Trust: source-cited
+      Evidence:
+        - Type: url
+          Ref: https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable
+          Excerpt: >-
+            "debUrl":"https://downloads.cursor.com/production/5f54c8173e5552412beb40702adac16275677fa0/linux/x64/deb/amd64/deb/cursor_3.30.14_amd64.deb"
+        - Type: source
+          Ref: https://raw.githubusercontent.com/electron/electron/main/shell/browser/browser_win.cc
+          Excerpt: constexpr base::wcstring_view Run = LR"(Software\Microsoft\Windows\CurrentVersion\Run)";
+        - Type: source
+          Ref: https://raw.githubusercontent.com/electron/electron/main/shell/browser/browser_win.cc
+          Excerpt: >-
+            void Browser::SetLoginItemSettings(LoginItemSettings settings) { base::win::RegKey
+            key(HKEY_CURRENT_USER, Run.c_str(), KEY_ALL_ACCESS);
+
 
 Detections:
   Sigma: []
